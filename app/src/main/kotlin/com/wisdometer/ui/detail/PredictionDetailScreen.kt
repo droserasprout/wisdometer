@@ -6,6 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.wisdometer.data.model.tagList
 import com.wisdometer.ui.components.ProbabilityBar
 import com.wisdometer.ui.components.StatusBadge
+import com.wisdometer.share.ShareImageRenderer
 import com.wisdometer.ui.theme.BarColors
 import com.wisdometer.ui.theme.WisdometerTypography
 
@@ -41,6 +43,20 @@ fun PredictionDetailScreen(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
                 Spacer(modifier = Modifier.weight(1f))
+                item?.let { pw ->
+                    val ctx = androidx.compose.ui.platform.LocalContext.current
+                    IconButton(onClick = {
+                        ShareImageRenderer.sharePredictionCard(
+                            context = ctx,
+                            question = pw.prediction.question,
+                            options = pw.sortedOptions.map { it.label to it.probability },
+                            isResolved = pw.isResolved,
+                            actualOptionLabel = pw.actualOption?.label,
+                        )
+                    }) {
+                        Icon(Icons.Default.Share, contentDescription = "Share")
+                    }
+                }
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Default.Edit, contentDescription = "Edit")
                 }

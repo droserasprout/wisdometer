@@ -3,11 +3,14 @@ package com.wisdometer.ui.profile
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.wisdometer.share.ShareImageRenderer
 import com.wisdometer.ui.theme.WisdometerTypography
 import kotlin.math.roundToInt
 
@@ -130,6 +133,29 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             }
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+        val ctx = androidx.compose.ui.platform.LocalContext.current
+        OutlinedButton(
+            onClick = {
+                ShareImageRenderer.shareProfileStats(
+                    context = ctx,
+                    accuracy = (state.simpleCloseness * 100).roundToInt(),
+                    brierScore = state.brierScore,
+                    totalPredictions = state.totalPredictions,
+                    resolvedPredictions = state.resolvedPredictions,
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Icon(
+                Icons.Default.Share,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(18.dp)
+                    .padding(end = 4.dp),
+            )
+            Text("Share Stats")
+        }
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
