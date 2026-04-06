@@ -1,5 +1,5 @@
 JAVA_HOME    ?= /usr/lib/jvm/java-17-openjdk
-ANDROID_HOME ?= $(HOME)/Android
+ANDROID_HOME := $(HOME)/Android/Sdk
 
 export JAVA_HOME
 export ANDROID_HOME
