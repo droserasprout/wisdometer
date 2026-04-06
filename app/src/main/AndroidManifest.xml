@@ -31,9 +31,5 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-
-        <receiver android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
-            android:exported="true"
-            android:permission="android.permission.DUMP" />
     </application>
 </manifest>

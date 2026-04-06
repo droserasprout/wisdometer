@@ -1,0 +1,29 @@
+# Gradle build outputs
+.gradle/
+build/
+app/build/
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+local.properties
+
+# Kotlin/Java class files
+*.class
+
+# Generated sources (KSP, KAPT)
+app/src/main/java/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Keystore / signing (never commit secrets)
+*.jks
+*.keystore
+release/
+
+# Lint
+lint/
