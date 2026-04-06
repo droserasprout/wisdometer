@@ -8,11 +8,11 @@ import androidx.compose.ui.graphics.Color
 
 private val AppColors = darkColorScheme(
     background = Color(0xFF222222),
-    surface = Color(0xFF2E2E2E),
+    surface = Color(0xFF2E2B28),
     onBackground = Color(0xFFEAEAE8),
     onSurface = Color(0xFFEAEAE8),
     onSurfaceVariant = Color(0xFF9A9A9A),
-    surfaceVariant = Color(0xFF383838),
+    surfaceVariant = Color(0xFF3A3632),
 )
 
 @Composable

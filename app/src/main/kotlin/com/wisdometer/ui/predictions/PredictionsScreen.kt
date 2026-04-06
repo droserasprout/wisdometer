@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wisdometer.ui.components.PredictionCard
-import com.wisdometer.ui.theme.Background
+import androidx.compose.material3.MaterialTheme
 import com.wisdometer.ui.theme.WisdometerTypography
 
 @Composable
@@ -27,7 +27,7 @@ fun PredictionsScreen(
     LaunchedEffect(Unit) { viewModel.refreshCompact() }
 
     Scaffold(
-        containerColor = Background,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             Text(
                 "Wisdometer",
