@@ -100,6 +100,25 @@ class ScoringEngineTest {
     }
 
     @Test
+    fun `brierScoreForTag filters by tag`() {
+        val p1 = Prediction(id = 1, question = "Q1", createdAt = Instant.EPOCH, resolvedAt = Instant.EPOCH,
+            outcomeOptionId = 1L, tags = "career")
+        val p2 = Prediction(id = 2, question = "Q2", createdAt = Instant.EPOCH, resolvedAt = Instant.EPOCH,
+            outcomeOptionId = 3L, tags = "finance")
+        // p1: 100% on correct → (1-1)^2 + 0 = 0.0
+        val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Yes", probability = 100, sortOrder = 0)
+        // p2: 50% on correct, 50% other → (0.5-1)^2 + 0.5^2 = 0.25 + 0.25 = 0.5
+        val opt2 = PredictionOption(id = 3, predictionId = 2, label = "No", probability = 50, sortOrder = 0)
+        val opt3 = PredictionOption(id = 4, predictionId = 2, label = "Yes", probability = 50, sortOrder = 1)
+        val items = listOf(
+            PredictionWithOptions(p1, listOf(opt1)),
+            PredictionWithOptions(p2, listOf(opt2, opt3)),
+        )
+        assertEquals(0.0, engine.brierScoreForTag(items, "career"), 0.001)
+        assertEquals(0.5, engine.brierScoreForTag(items, "finance"), 0.001)
+    }
+
+    @Test
     fun `avgConfidence is mean probability of top-ranked option`() {
         val p1 = Prediction(id = 1, question = "Q", createdAt = Instant.EPOCH)
         val p2 = Prediction(id = 2, question = "Q2", createdAt = Instant.EPOCH)
