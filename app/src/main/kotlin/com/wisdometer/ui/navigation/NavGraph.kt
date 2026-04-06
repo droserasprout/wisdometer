@@ -31,10 +31,15 @@ sealed class Route(val path: String) {
 }
 
 @Composable
-fun NavGraph() {
+fun NavGraph(initialPredictionId: Long? = null) {
     val navController = rememberNavController()
     val navBackStack by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStack?.destination?.route
+
+    // Navigate to detail on first launch if opened from notification
+    LaunchedEffect(initialPredictionId) {
+        initialPredictionId?.let { navController.navigate(Route.Detail.withId(it)) }
+    }
 
     val bottomRoutes = listOf(Route.Predictions.path, Route.Profile.path, Route.Settings.path)
 

@@ -14,9 +14,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val notificationPredictionId = intent.getLongExtra("prediction_id", -1L)
+            .takeIf { it != -1L }
         setContent {
             WisdometerTheme {
-                NavGraph()
+                NavGraph(initialPredictionId = notificationPredictionId)
             }
         }
     }
