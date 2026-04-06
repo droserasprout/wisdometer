@@ -1,0 +1,4 @@
+{"type":"server-started","port":64690,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:64690","screen_dir":"/home/droserasprout/git/wisdometer/.superpowers/brainstorm/235533-1775487723/content","state_dir":"/home/droserasprout/git/wisdometer/.superpowers/brainstorm/235533-1775487723/state"}
+{"type":"screen-added","file":"/home/droserasprout/git/wisdometer/.superpowers/brainstorm/235533-1775487723/content/visual-style.html"}
+{"type":"screen-added","file":"/home/droserasprout/git/wisdometer/.superpowers/brainstorm/235533-1775487723/content/waiting.html"}
+{"type":"server-stopped","reason":"idle timeout"}
