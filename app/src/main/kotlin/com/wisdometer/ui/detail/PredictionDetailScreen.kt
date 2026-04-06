@@ -1,6 +1,7 @@
 package com.wisdometer.ui.detail
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -105,6 +106,7 @@ fun PredictionDetailScreen(
                     Button(
                         onClick = { showOutcomeDialog = true },
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
                     ) {
                         Text("Set Outcome")
                     }
@@ -114,6 +116,7 @@ fun PredictionDetailScreen(
                 OutlinedButton(
                     onClick = { showDeleteDialog = true },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
                 ) {
                     Text("Delete Prediction")
                 }

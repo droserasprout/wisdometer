@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -63,6 +64,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         OutlinedButton(
             onClick = { exportLauncher.launch("wisdometer-export-$today.json") },
             modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
         ) {
             Text("Export JSON")
         }
@@ -72,6 +74,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         OutlinedButton(
             onClick = { importLauncher.launch(arrayOf("application/json")) },
             modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
         ) {
             Text("Import JSON")
         }

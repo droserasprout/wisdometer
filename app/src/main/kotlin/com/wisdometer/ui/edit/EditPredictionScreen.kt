@@ -1,6 +1,7 @@
 package com.wisdometer.ui.edit
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -133,6 +134,7 @@ fun EditPredictionScreen(
             OutlinedButton(
                 onClick = { showDatePicker = true },
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
             ) {
                 Text(dateLabel)
             }
@@ -167,6 +169,7 @@ fun EditPredictionScreen(
                 onClick = { viewModel.save(onDone) },
                 enabled = state.question.isNotBlank() && state.probabilitySum == 100 && !state.isSaving,
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
             ) {
                 Text(if (state.isSaving) "Saving…" else "Save")
             }

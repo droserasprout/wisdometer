@@ -1,6 +1,7 @@
 package com.wisdometer.ui.profile
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -151,6 +152,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         Spacer(modifier = Modifier.height(8.dp))
         val ctx = androidx.compose.ui.platform.LocalContext.current
         OutlinedButton(
+            shape = RoundedCornerShape(8.dp),
             onClick = {
                 ShareImageRenderer.shareProfileStats(
                     context = ctx,

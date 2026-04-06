@@ -26,6 +26,10 @@ data class EditUiState(
     val probabilitySum: Int = 0,
     val isSaving: Boolean = false,
     val isLoaded: Boolean = false,
+    // preserved from original — never overwritten on edit
+    val createdAt: Instant = Instant.now(),
+    val resolvedAt: Instant? = null,
+    val outcomeOptionId: Long? = null,
 )
 
 @HiltViewModel
@@ -53,6 +57,9 @@ class EditPredictionViewModel @Inject constructor(
                         tagsInput = item.prediction.tags.replace(",", ", "),
                         probabilitySum = item.options.sumOf { opt -> opt.probability },
                         isLoaded = true,
+                        createdAt = item.prediction.createdAt,
+                        resolvedAt = item.prediction.resolvedAt,
+                        outcomeOptionId = item.prediction.outcomeOptionId,
                     )
                 }
             }
@@ -100,8 +107,10 @@ class EditPredictionViewModel @Inject constructor(
             val prediction = Prediction(
                 id = editingPredictionId ?: 0L,
                 question = s.question.trim(),
-                createdAt = Instant.now(),
+                createdAt = if (editingPredictionId != null) s.createdAt else Instant.now(),
                 reminderAt = s.reminderAt,
+                resolvedAt = s.resolvedAt,
+                outcomeOptionId = s.outcomeOptionId,
                 tags = tags,
             )
             val options = s.options.mapIndexed { i, draft ->
