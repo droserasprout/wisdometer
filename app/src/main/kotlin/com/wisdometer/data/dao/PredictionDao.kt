@@ -15,10 +15,14 @@ interface PredictionDao {
         ORDER BY
           CASE
             WHEN reminderAt IS NOT NULL AND resolvedAt IS NULL AND reminderAt > :nowMs THEN 0
-            ELSE 1
+            WHEN resolvedAt IS NULL THEN 1
+            ELSE 2
           END ASC,
-          reminderAt ASC,
-          CASE WHEN resolvedAt IS NULL THEN 0 ELSE 1 END ASC,
+          CASE
+            WHEN reminderAt IS NOT NULL AND resolvedAt IS NULL AND reminderAt > :nowMs
+            THEN reminderAt
+            ELSE NULL
+          END ASC,
           createdAt DESC
     """)
     fun getAllWithOptions(nowMs: Long): Flow<List<PredictionWithOptions>>
