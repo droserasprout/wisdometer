@@ -81,12 +81,14 @@ fun PredictionDetailScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
+                val topOptionId = pw.sortedOptions.maxByOrNull { it.probability }?.id
                 pw.sortedOptions.forEachIndexed { index, option ->
                     ProbabilityBar(
                         label = option.label,
                         probability = option.probability,
                         barColor = BarColors[index % BarColors.size],
                         isActualOutcome = option.id == pw.prediction.outcomeOptionId,
+                        isTopPrediction = option.id == topOptionId,
                         compact = false,
                     )
                 }

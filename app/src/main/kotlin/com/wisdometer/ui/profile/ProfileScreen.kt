@@ -12,7 +12,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wisdometer.share.ShareImageRenderer
 import com.wisdometer.ui.theme.WisdometerTypography
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
+
+private val chartDateFormatter = DateTimeFormatter.ofPattern("MMM d").withZone(ZoneId.systemDefault())
 
 @Composable
 fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
@@ -99,11 +104,21 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 val chartPoints = if (useTimeAxis) state.accuracyOverTime else state.accuracyOverCount
+                val xFirst = chartPoints.firstOrNull()?.first?.let { v ->
+                    if (useTimeAxis) chartDateFormatter.format(Instant.ofEpochMilli(v as Long))
+                    else "#$v"
+                } ?: ""
+                val xLast = chartPoints.lastOrNull()?.first?.let { v ->
+                    if (useTimeAxis) chartDateFormatter.format(Instant.ofEpochMilli(v as Long))
+                    else "#$v"
+                } ?: ""
                 AccuracyChart(
                     points = chartPoints,
+                    xLabelFirst = xFirst,
+                    xLabelLast = xLast,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp),
+                        .height(200.dp),
                 )
             }
         }

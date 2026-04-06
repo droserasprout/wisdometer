@@ -9,12 +9,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.wisdometer.ui.theme.*
+import com.wisdometer.ui.theme.LocalWisdometerColors
 
 @Composable
 fun StatusBadge(isResolved: Boolean, modifier: Modifier = Modifier) {
-    val bg = if (isResolved) BadgeResolvedBackground else BadgeOpenBackground
-    val text = if (isResolved) BadgeResolvedText else BadgeOpenText
+    val colors = LocalWisdometerColors.current
+    val bg = if (isResolved) colors.badgeResolvedBackground else colors.badgeOpenBackground
+    val text = if (isResolved) colors.badgeResolvedText else colors.badgeOpenText
     val label = if (isResolved) "RESOLVED" else "OPEN"
 
     Text(

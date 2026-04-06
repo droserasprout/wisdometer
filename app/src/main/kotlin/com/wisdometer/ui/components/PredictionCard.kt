@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import com.wisdometer.data.model.PredictionWithOptions
 import com.wisdometer.data.model.tagList
@@ -27,13 +29,17 @@ fun PredictionCard(
 ) {
     val cardPadding = if (compact) 10.dp else 16.dp
     val optionSpacing = if (compact) 2.dp else 4.dp
+    val wisdometerColors = LocalWisdometerColors.current
+    val resolvedAlpha = if (item.isResolved) wisdometerColors.resolvedCardAlpha else 1f
+    val topOptionId = item.sortedOptions.maxByOrNull { it.probability }?.id
 
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .alpha(resolvedAlpha)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(modifier = Modifier.padding(cardPadding)) {
@@ -58,6 +64,7 @@ fun PredictionCard(
                     probability = option.probability,
                     barColor = BarColors[index % BarColors.size],
                     isActualOutcome = option.id == item.prediction.outcomeOptionId,
+                    isTopPrediction = option.id == topOptionId,
                     compact = compact,
                 )
             }
