@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.wisdometer.data.model.PredictionWithOptions
 import com.wisdometer.data.model.tagList
 import com.wisdometer.data.repository.PredictionRepository
+import com.wisdometer.domain.CalibrationPoint
 import com.wisdometer.domain.ScoringEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -22,6 +23,8 @@ data class ProfileUiState(
     val tagAccuracies: List<TagAccuracy> = emptyList(),
     val accuracyOverTime: List<Pair<Long, Double>> = emptyList(),
     val accuracyOverCount: List<Pair<Int, Double>> = emptyList(),
+    val calibration: List<CalibrationPoint> = emptyList(),
+    val confidenceDistribution: List<Pair<Int, Int>> = emptyList(),
 )
 
 @HiltViewModel
@@ -51,6 +54,8 @@ class ProfileViewModel @Inject constructor(
                 tagAccuracies = tagAccuracies,
                 accuracyOverTime = engine.accuracyOverTime(resolved),
                 accuracyOverCount = engine.accuracyOverCount(resolved),
+                calibration = engine.calibrationData(resolved),
+                confidenceDistribution = engine.confidenceDistribution(all),
             )
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ProfileUiState())

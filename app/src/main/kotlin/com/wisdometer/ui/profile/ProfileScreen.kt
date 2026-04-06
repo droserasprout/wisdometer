@@ -124,6 +124,40 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             }
         }
 
+        // Calibration chart
+        Spacer(modifier = Modifier.height(16.dp))
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Calibration", style = WisdometerTypography.titleMedium)
+                Text(
+                    "Predicted % vs actual hit rate · dashed = perfect",
+                    style = WisdometerTypography.bodySmall,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                CalibrationChart(
+                    points = state.calibration,
+                    modifier = Modifier.fillMaxWidth().height(200.dp),
+                )
+            }
+        }
+
+        // Confidence distribution
+        Spacer(modifier = Modifier.height(16.dp))
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Confidence distribution", style = WisdometerTypography.titleMedium)
+                Text(
+                    "How often your top option falls in each probability bucket",
+                    style = WisdometerTypography.bodySmall,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                ConfidenceChart(
+                    distribution = state.confidenceDistribution,
+                    modifier = Modifier.fillMaxWidth().height(180.dp),
+                )
+            }
+        }
+
         // Tag accuracy breakdown
         if (state.tagAccuracies.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
