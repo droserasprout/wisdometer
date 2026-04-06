@@ -1,6 +1,7 @@
 package com.wisdometer.ui.navigation
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.List
@@ -15,7 +16,6 @@ import com.wisdometer.ui.edit.EditPredictionScreen
 import com.wisdometer.ui.predictions.PredictionsScreen
 import com.wisdometer.ui.profile.ProfileScreen
 import com.wisdometer.ui.settings.SettingsScreen
-import com.wisdometer.ui.theme.Background
 
 sealed class Route(val path: String) {
     object Predictions : Route("predictions")
@@ -44,10 +44,10 @@ fun NavGraph(initialPredictionId: Long? = null) {
     val bottomRoutes = listOf(Route.Predictions.path, Route.Profile.path, Route.Settings.path)
 
     Scaffold(
-        containerColor = Background,
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             if (currentRoute in bottomRoutes) {
-                NavigationBar(containerColor = Background) {
+                NavigationBar(containerColor = MaterialTheme.colorScheme.background) {
                     NavigationBarItem(
                         selected = currentRoute == Route.Predictions.path,
                         onClick = { navController.navigate(Route.Predictions.path) { launchSingleTop = true } },
