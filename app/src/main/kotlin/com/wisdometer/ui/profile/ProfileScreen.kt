@@ -1,5 +1,6 @@
 package com.wisdometer.ui.profile
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
@@ -8,10 +9,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wisdometer.share.ShareImageRenderer
+import com.wisdometer.ui.theme.BarColors
 import com.wisdometer.ui.theme.WisdometerTypography
 import java.time.Instant
 import java.time.ZoneId
@@ -34,35 +44,93 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         Text("Profile", style = WisdometerTypography.headlineLarge)
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Overall accuracy card
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    "${(state.simpleCloseness * 100).roundToInt()}% Accuracy",
-                    style = WisdometerTypography.headlineLarge,
+        // Accuracy card with donut ring
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AccuracyDonut(
+                    fraction = state.simpleCloseness.toFloat(),
+                    modifier = Modifier.size(72.dp),
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                ) {
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
                     Text(
-                        "Brier Score: ${"%.2f".format(state.brierScore)}",
-                        style = WisdometerTypography.bodySmall,
+                        if (state.isLoaded) "${(state.simpleCloseness * 100).roundToInt()}% Accuracy"
+                        else "... Accuracy",
+                        style = WisdometerTypography.headlineLarge,
                     )
-                    var showTooltip by remember { mutableStateOf(false) }
-                    IconButton(onClick = { showTooltip = !showTooltip }) {
-                        Text("?")
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            if (state.isLoaded) "Brier: ${"%.2f".format(state.brierScore)}" else "Brier: ...",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        var showTooltip by remember { mutableStateOf(false) }
+                        Box(
+                            modifier = Modifier
+                                .wrapContentSize()
+                                .padding(0.dp),
+                        ) {
+                            TextButton(
+                                onClick = { showTooltip = !showTooltip },
+                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
+                            ) {
+                                Text(
+                                    "?",
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                            if (showTooltip) {
+                                AlertDialog(
+                                    onDismissRequest = { showTooltip = false },
+                                    title = { Text("Brier Score") },
+                                    text = { Text("Measures calibration — 0.0 is perfect, 2.0 is worst.") },
+                                    confirmButton = {
+                                        TextButton(onClick = { showTooltip = false }) { Text("OK") }
+                                    },
+                                )
+                            }
+                        }
                     }
-                    if (showTooltip) {
-                        AlertDialog(
-                            onDismissRequest = { showTooltip = false },
-                            title = { Text("Brier Score") },
-                            text = { Text("Brier score measures calibration — 0.0 is perfect, 2.0 is worst.") },
-                            confirmButton = {
-                                TextButton(onClick = { showTooltip = false }) { Text("OK") }
-                            },
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        if (state.isLoaded)
+                            "${state.resolvedPredictions} resolved · ${state.openPredictions} open"
+                        else "... resolved · ... open",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 2×2 stat tiles
+        val statTiles = listOf(
+            Triple("Total", if (state.isLoaded) state.totalPredictions.toString() else "...", BarColors[0]),
+            Triple("Resolved", if (state.isLoaded) state.resolvedPredictions.toString() else "...", BarColors[1]),
+            Triple("Open", if (state.isLoaded) state.openPredictions.toString() else "...", BarColors[2]),
+            Triple("Avg Confidence", if (state.isLoaded) "${state.avgConfidence.roundToInt()}%" else "...", BarColors[3]),
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            statTiles.chunked(2).forEach { rowTiles ->
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    rowTiles.forEach { (label, value, accentColor) ->
+                        StatTile(
+                            label = label,
+                            value = value,
+                            accentColor = accentColor,
+                            modifier = Modifier.weight(1f),
                         )
                     }
                 }
@@ -71,26 +139,13 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Summary stats card
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Text("Summary", style = WisdometerTypography.titleMedium)
-                Text("Total: ${state.totalPredictions}")
-                Text("Resolved: ${state.resolvedPredictions}")
-                Text("Open: ${state.openPredictions}")
-                Text("Avg Confidence: ${(state.avgConfidence).roundToInt()}%")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         // Accuracy chart card with toggle
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Accuracy", style = WisdometerTypography.titleMedium)
+                Text("Accuracy over time", style = WisdometerTypography.titleMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(
                         selected = useTimeAxis,
@@ -125,13 +180,17 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         }
 
         // Calibration chart
-        Spacer(modifier = Modifier.height(16.dp))
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Spacer(modifier = Modifier.height(12.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Calibration", style = WisdometerTypography.titleMedium)
                 Text(
                     "Predicted % vs actual hit rate · dashed = perfect",
-                    style = WisdometerTypography.bodySmall,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 CalibrationChart(
@@ -142,13 +201,17 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         }
 
         // Confidence distribution
-        Spacer(modifier = Modifier.height(16.dp))
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Spacer(modifier = Modifier.height(12.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Confidence distribution", style = WisdometerTypography.titleMedium)
                 Text(
                     "How often your top option falls in each probability bucket",
-                    style = WisdometerTypography.bodySmall,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 ConfidenceChart(
@@ -160,8 +223,11 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
 
         // Tag accuracy breakdown
         if (state.tagAccuracies.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("By Tag", style = WisdometerTypography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
@@ -175,7 +241,8 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                             Text(ta.tag, style = WisdometerTypography.bodyMedium)
                             Text(
                                 "${(ta.closeness * 100).roundToInt()}%",
-                                style = WisdometerTypography.bodySmall,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
@@ -208,5 +275,81 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             Text("Share Stats")
         }
         Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun StatTile(
+    label: String,
+    value: String,
+    accentColor: Color,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(12.dp),
+    ) {
+        Column {
+            // Colored top border
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .then(Modifier.wrapContentSize(Alignment.TopStart)),
+            ) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    drawRect(color = accentColor)
+                }
+            }
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    value,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccuracyDonut(
+    fraction: Float,
+    modifier: Modifier = Modifier,
+) {
+    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+    val fillColor = BarColors[0]
+    Canvas(modifier = modifier) {
+        val strokeWidth = size.minDimension * 0.15f
+        val inset = strokeWidth / 2f
+        val arcSize = Size(size.width - strokeWidth, size.height - strokeWidth)
+        val topLeft = Offset(inset, inset)
+        // Track
+        drawArc(
+            color = trackColor,
+            startAngle = -90f,
+            sweepAngle = 360f,
+            useCenter = false,
+            topLeft = topLeft,
+            size = arcSize,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+        )
+        // Fill
+        drawArc(
+            color = fillColor,
+            startAngle = -90f,
+            sweepAngle = 360f * fraction.coerceIn(0f, 1f),
+            useCenter = false,
+            topLeft = topLeft,
+            size = arcSize,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+        )
     }
 }

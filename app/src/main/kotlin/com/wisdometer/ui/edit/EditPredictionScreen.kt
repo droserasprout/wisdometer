@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -18,6 +19,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.wisdometer.ui.theme.WisdometerTypography
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+
+private val dateFmt = DateTimeFormatter.ofPattern("MMM d, yyyy")
+
+private fun formatDate(millis: Long): String =
+    java.time.ZonedDateTime.ofInstant(
+        java.time.Instant.ofEpochMilli(millis), ZoneId.systemDefault()
+    ).format(dateFmt)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,21 +40,31 @@ fun EditPredictionScreen(
 
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
-    var showDatePicker by remember { mutableStateOf(false) }
+    var showStartDatePicker by remember { mutableStateOf(false) }
+    var showEndDatePicker by remember { mutableStateOf(false) }
+
+    val canSave = state.question.isNotBlank() && state.probabilitySum == 100 &&
+        state.reminderAt != null && !state.isSaving
 
     Scaffold(
         topBar = {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                IconButton(onClick = onDone) {
+                    Icon(Icons.Default.Close, contentDescription = "Close")
+                }
                 Text(
                     if (predictionId == null) "New Prediction" else "Edit Prediction",
                     style = WisdometerTypography.headlineMedium,
                 )
-                IconButton(onClick = onDone) {
-                    Icon(Icons.Default.Close, contentDescription = "Close")
+                IconButton(
+                    onClick = { viewModel.save(onDone) },
+                    enabled = canSave,
+                ) {
+                    Icon(Icons.Default.Check, contentDescription = "Save")
                 }
             }
         },
@@ -134,54 +152,80 @@ fun EditPredictionScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Reminder date picker
-            val dateLabel = state.reminderAt?.let {
-                java.time.ZonedDateTime.ofInstant(it, ZoneId.systemDefault())
-                    .format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
-            } ?: "Set reminder (optional)"
+            // Start date
+            val startLabel = formatDate(state.createdAt.toEpochMilli())
             OutlinedButton(
-                onClick = { showDatePicker = true },
+                onClick = { showStartDatePicker = true },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
             ) {
-                Text(dateLabel)
+                Text("Start: $startLabel")
             }
 
-            if (showDatePicker) {
-                val datePickerState = rememberDatePickerState(
-                    initialSelectedDateMillis = state.reminderAt?.toEpochMilli()
-                )
-                DatePickerDialog(
-                    onDismissRequest = { showDatePicker = false },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            datePickerState.selectedDateMillis?.let {
-                                viewModel.setReminder(java.time.Instant.ofEpochMilli(it))
-                            }
-                            showDatePicker = false
-                        }) { Text("OK") }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = {
-                            viewModel.setReminder(null)
-                            showDatePicker = false
-                        }) { Text("Clear") }
-                    },
-                ) {
-                    DatePicker(state = datePickerState)
-                }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // End date (required)
+            val endLabel = state.reminderAt?.let { "End: ${formatDate(it.toEpochMilli())}" }
+                ?: "Set end date"
+            OutlinedButton(
+                onClick = { showEndDatePicker = true },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = if (state.reminderAt == null)
+                    ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                else
+                    ButtonDefaults.outlinedButtonColors(),
+            ) {
+                Text(endLabel)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            Button(
-                onClick = { viewModel.save(onDone) },
-                enabled = state.question.isNotBlank() && state.probabilitySum == 100 && !state.isSaving,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-            ) {
-                Text(if (state.isSaving) "Saving…" else "Save")
+
+            // Start date picker dialog
+            if (showStartDatePicker) {
+                val pickerState = rememberDatePickerState(
+                    initialSelectedDateMillis = state.createdAt.toEpochMilli()
+                )
+                DatePickerDialog(
+                    onDismissRequest = { showStartDatePicker = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            pickerState.selectedDateMillis?.let {
+                                viewModel.setStartDate(java.time.Instant.ofEpochMilli(it))
+                            }
+                            showStartDatePicker = false
+                        }) { Text("OK") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showStartDatePicker = false }) { Text("Cancel") }
+                    },
+                ) {
+                    DatePicker(state = pickerState)
+                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+
+            // End date picker dialog
+            if (showEndDatePicker) {
+                val pickerState = rememberDatePickerState(
+                    initialSelectedDateMillis = state.reminderAt?.toEpochMilli()
+                )
+                DatePickerDialog(
+                    onDismissRequest = { showEndDatePicker = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            pickerState.selectedDateMillis?.let {
+                                viewModel.setEndDate(java.time.Instant.ofEpochMilli(it))
+                            }
+                            showEndDatePicker = false
+                        }) { Text("OK") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showEndDatePicker = false }) { Text("Cancel") }
+                    },
+                ) {
+                    DatePicker(state = pickerState)
+                }
+            }
         }
     }
 }

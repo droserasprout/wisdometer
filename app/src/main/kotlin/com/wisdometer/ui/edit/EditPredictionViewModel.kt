@@ -70,7 +70,8 @@ class EditPredictionViewModel @Inject constructor(
 
     fun setQuestion(q: String) = _state.update { it.copy(question = q) }
     fun setDescription(d: String) = _state.update { it.copy(description = d) }
-    fun setReminder(instant: Instant?) = _state.update { it.copy(reminderAt = instant) }
+    fun setStartDate(instant: Instant) = _state.update { it.copy(createdAt = instant) }
+    fun setEndDate(instant: Instant?) = _state.update { it.copy(reminderAt = instant) }
     fun setTagsInput(t: String) = _state.update { it.copy(tagsInput = t) }
 
     fun setOptionLabel(index: Int, label: String) = updateOption(index) { it.copy(label = label) }
@@ -111,7 +112,7 @@ class EditPredictionViewModel @Inject constructor(
                 id = editingPredictionId ?: 0L,
                 title = s.question.trim(),
                 description = s.description.trim(),
-                createdAt = if (editingPredictionId != null) s.createdAt else Instant.now(),
+                createdAt = s.createdAt,
                 reminderAt = s.reminderAt,
                 resolvedAt = s.resolvedAt,
                 outcomeOptionId = s.outcomeOptionId,

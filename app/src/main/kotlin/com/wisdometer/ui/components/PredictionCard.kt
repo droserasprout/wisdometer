@@ -4,7 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Label
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.wisdometer.data.model.PredictionWithOptions
 import com.wisdometer.data.model.tagList
 import com.wisdometer.ui.theme.*
@@ -87,7 +86,7 @@ fun PredictionCard(
                 )
             }
 
-            // Tags row
+            // Tags + reminder row
             if (tags.isNotEmpty() || reminder != null) {
                 Spacer(modifier = Modifier.height(if (compact) 4.dp else 8.dp))
                 Row(
@@ -98,15 +97,16 @@ fun PredictionCard(
                     if (tags.isNotEmpty()) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                Icons.Default.Label,
+                                Icons.AutoMirrored.Filled.Label,
                                 contentDescription = null,
-                                modifier = Modifier.size(12.dp),
+                                modifier = Modifier.size(11.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(3.dp))
                             Text(
                                 text = tags.joinToString(" · "),
-                                style = WisdometerTypography.bodySmall,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     } else {
@@ -115,7 +115,8 @@ fun PredictionCard(
                     if (reminder != null) {
                         Text(
                             text = "⏰ ${dateFmt.format(reminder)}",
-                            style = WisdometerTypography.bodySmall,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -130,14 +131,14 @@ fun PredictionCard(
                 ) {
                     Text(
                         text = "📅 ${dateFmtShort.format(item.prediction.createdAt)}",
-                        fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     item.prediction.updatedAt?.let { updatedAt ->
                         Text(
                             text = "✏️ ${dateFmtShort.format(updatedAt)}",
-                            fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }

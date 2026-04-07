@@ -14,6 +14,7 @@ import javax.inject.Inject
 data class TagAccuracy(val tag: String, val closeness: Double, val brierScore: Double)
 
 data class ProfileUiState(
+    val isLoaded: Boolean = false,
     val totalPredictions: Int = 0,
     val resolvedPredictions: Int = 0,
     val openPredictions: Int = 0,
@@ -45,6 +46,7 @@ class ProfileViewModel @Inject constructor(
                 )
             }
             ProfileUiState(
+                isLoaded = true,
                 totalPredictions = all.size,
                 resolvedPredictions = resolved.size,
                 openPredictions = all.size - resolved.size,

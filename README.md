@@ -5,24 +5,28 @@ Offline Android app for tracking personal predictions. Works like a prediction m
 ## Features
 
 - Create predictions with multiple options and probability estimates (must sum to 100%)
+- Start date (defaults to today) and required end date per prediction
 - Resolve predictions by marking which outcome occurred
 - Accuracy tracking: simple closeness score and Brier score
-- Profile screen with calibration chart, confidence distribution, and accuracy over time
+- Dashboard-style profile with donut accuracy ring, stat tiles, calibration chart, confidence distribution, and accuracy over time
 - Tag predictions and see accuracy broken down by tag
-- Optional reminder notifications via WorkManager
+- Optional description field for extra context
 - Export / import as JSON
 - Share predictions and stats as images
 - Compact / normal list density toggle
+- Always-dark theme
 
 ## Tech stack
 
 - **Language:** Kotlin
-- **UI:** Jetpack Compose with custom dark theme
+- **UI:** Jetpack Compose with Material3 dark theme
 - **Architecture:** MVVM — ViewModel + StateFlow + Repository
-- **Database:** Room (SQLite)
+- **Database:** Room (SQLite), currently at schema version 2
 - **DI:** Hilt
-- **Background work:** WorkManager
+- **Background work:** WorkManager (reminder notifications)
+- **Serialization:** kotlinx.serialization (JSON export/import)
 - **Min SDK:** 26 (Android 8.0)
+- **Target SDK:** 35
 
 ## Requirements
 
@@ -50,12 +54,12 @@ See `make tasks` for the full Gradle task list and `make env` to verify your env
 app/src/main/kotlin/com/wisdometer/
 ├── data/
 │   ├── dao/          Room DAO
-│   ├── db/           Database + type converters
+│   ├── db/           Database, type converters, migrations
 │   ├── model/        Prediction, PredictionOption, PredictionWithOptions
 │   └── repository/   PredictionRepository (interface + impl)
-├── di/               Hilt modules
+├── di/               Hilt modules (AppModule, DatabaseModule)
 ├── domain/           ScoringEngine (accuracy, Brier, calibration)
-├── export/           JSON export / import
+├── export/           JSON export/import (ExportModels, JsonConverter, JsonExporter, JsonImporter)
 ├── notifications/    ReminderWorker, NotificationScheduler
 ├── share/            Share-as-image renderer
 └── ui/
@@ -64,7 +68,7 @@ app/src/main/kotlin/com/wisdometer/
     ├── edit/         New / edit prediction screen
     ├── navigation/   NavGraph
     ├── predictions/  Prediction list screen
-    ├── profile/      Profile screen + charts
+    ├── profile/      Profile screen, AccuracyChart, CalibrationChart, ConfidenceChart
     ├── settings/     Settings screen
     └── theme/        Colors, typography, theme
 ```
@@ -73,6 +77,6 @@ app/src/main/kotlin/com/wisdometer/
 
 **Simple closeness** — `probability_of_actual_outcome / 100`, averaged across resolved predictions. Shown as a percentage (e.g. "73% accuracy").
 
-**Brier score** — `(p_actual − 1)² + Σ(p_other)²`, averaged across resolved predictions. 0.0 = perfect, 2.0 = worst.
+**Brier score** — `(p_actual - 1)^2 + sum(p_other^2)`, averaged across resolved predictions. 0.0 = perfect, 2.0 = worst.
 
 **Calibration** — for each 10%-wide probability bucket, what fraction of options in that bucket actually occurred? A well-calibrated forecaster tracks the diagonal.
