@@ -11,7 +11,7 @@ data class Prediction(
     @ColumnInfo(name = "question") val title: String,
     val description: String = "",
     val createdAt: Instant = Instant.now(),
-    val updatedAt: Instant? = null,
+    @ColumnInfo(name = "updated_at") val updatedAt: Instant? = null,
     val reminderAt: Instant? = null,
     val resolvedAt: Instant? = null,
     val outcomeOptionId: Long? = null,
