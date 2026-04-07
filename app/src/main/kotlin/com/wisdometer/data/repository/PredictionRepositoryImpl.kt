@@ -22,15 +22,16 @@ class PredictionRepositoryImpl @Inject constructor(
         dao.getWithOptionsById(id)
 
     override suspend fun savePrediction(prediction: Prediction, options: List<PredictionOption>) {
-        val savedId = dao.upsertPredictionWithOptions(prediction, options)
-        val reminder = prediction.reminderAt
-        if (reminder != null && prediction.resolvedAt == null) {
+        val toSave = if (prediction.id != 0L) prediction.copy(updatedAt = Instant.now()) else prediction
+        val savedId = dao.upsertPredictionWithOptions(toSave, options)
+        val reminder = toSave.reminderAt
+        if (reminder != null && toSave.resolvedAt == null) {
             notificationScheduler.schedule(
                 predictionId = savedId,
                 reminderAtMs = reminder.toEpochMilli(),
-                question = prediction.question,
+                question = toSave.title,
             )
-        } else if (prediction.resolvedAt != null) {
+        } else if (toSave.resolvedAt != null) {
             notificationScheduler.cancel(savedId)
         }
     }
@@ -49,7 +50,7 @@ class PredictionRepositoryImpl @Inject constructor(
     override suspend fun importPredictions(items: List<PredictionWithOptions>) {
         for (item in items) {
             val existing = dao.countByQuestionAndCreatedAt(
-                item.prediction.question,
+                item.prediction.title,
                 item.prediction.createdAt.toEpochMilli(),
             )
             if (existing == 0) {

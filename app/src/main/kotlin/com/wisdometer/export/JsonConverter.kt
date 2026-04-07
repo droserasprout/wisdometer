@@ -15,8 +15,10 @@ class JsonConverter @Inject constructor() {
         predictions = items.map { item ->
             ExportedPrediction(
                 id = item.prediction.id,
-                question = item.prediction.question,
+                question = item.prediction.title,
+                description = item.prediction.description,
                 createdAt = item.prediction.createdAt.toString(),
+                updatedAt = item.prediction.updatedAt?.toString(),
                 reminderAt = item.prediction.reminderAt?.toString(),
                 resolvedAt = item.prediction.resolvedAt?.toString(),
                 outcomeOptionId = item.prediction.outcomeOptionId,
@@ -33,8 +35,10 @@ class JsonConverter @Inject constructor() {
         file.predictions.map { ep ->
             val prediction = Prediction(
                 id = 0,
-                question = ep.question,
+                title = ep.question,
+                description = ep.description,
                 createdAt = Instant.parse(ep.createdAt),
+                updatedAt = ep.updatedAt?.let { Instant.parse(it) },
                 reminderAt = ep.reminderAt?.let { Instant.parse(it) },
                 resolvedAt = ep.resolvedAt?.let { Instant.parse(it) },
                 outcomeOptionId = ep.outcomeOptionId,

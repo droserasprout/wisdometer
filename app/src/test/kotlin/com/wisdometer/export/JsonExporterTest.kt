@@ -15,7 +15,7 @@ class JsonExporterTest {
     @Test
     fun `toExportFile converts predictions with tags and options`() {
         val prediction = Prediction(
-            id = 1L, question = "Will I find a job?", tags = "career,finance",
+            id = 1L, title = "Will I find a job?", tags = "career,finance",
             outcomeOptionId = 2L, resolvedAt = Instant.parse("2026-06-01T00:00:00Z"),
             createdAt = Instant.parse("2026-01-01T00:00:00Z"),
         )
@@ -39,7 +39,7 @@ class JsonExporterTest {
 
     @Test
     fun `toExportFile with empty tags produces empty list`() {
-        val prediction = Prediction(id = 1L, question = "Q", tags = "", createdAt = Instant.EPOCH)
+        val prediction = Prediction(id = 1L, title = "Q", tags = "", createdAt = Instant.EPOCH)
         val opt = PredictionOption(id = 1L, predictionId = 1L, label = "Y", probability = 100, sortOrder = 0)
         val file = converter.toExportFile(listOf(PredictionWithOptions(prediction, listOf(opt))))
         assertEquals(emptyList<String>(), file.predictions[0].tags)
@@ -47,7 +47,7 @@ class JsonExporterTest {
 
     @Test
     fun `JSON round-trip preserves all fields`() {
-        val prediction = Prediction(id = 1L, question = "Round trip?", tags = "test", createdAt = Instant.EPOCH)
+        val prediction = Prediction(id = 1L, title = "Round trip?", tags = "test", createdAt = Instant.EPOCH)
         val opt = PredictionOption(id = 1L, predictionId = 1L, label = "Yes", probability = 100, sortOrder = 0)
         val original = converter.toExportFile(listOf(PredictionWithOptions(prediction, listOf(opt))))
         val json = Json.encodeToString(ExportFile.serializer(), original)

@@ -20,6 +20,7 @@ data class OptionDraft(
 
 data class EditUiState(
     val question: String = "",
+    val description: String = "",
     val options: List<OptionDraft> = listOf(OptionDraft(sortOrder = 0), OptionDraft(sortOrder = 1)),
     val reminderAt: Instant? = null,
     val tagsInput: String = "",
@@ -49,7 +50,8 @@ class EditPredictionViewModel @Inject constructor(
                 editingPredictionId = id
                 _state.update {
                     it.copy(
-                        question = item.prediction.question,
+                        question = item.prediction.title,
+                        description = item.prediction.description,
                         options = item.sortedOptions.mapIndexed { i, opt ->
                             OptionDraft(opt.id, opt.label, opt.probability, i)
                         },
@@ -67,6 +69,7 @@ class EditPredictionViewModel @Inject constructor(
     }
 
     fun setQuestion(q: String) = _state.update { it.copy(question = q) }
+    fun setDescription(d: String) = _state.update { it.copy(description = d) }
     fun setReminder(instant: Instant?) = _state.update { it.copy(reminderAt = instant) }
     fun setTagsInput(t: String) = _state.update { it.copy(tagsInput = t) }
 
@@ -106,7 +109,8 @@ class EditPredictionViewModel @Inject constructor(
             val tags = s.tagsInput.split(",").map { it.trim() }.filter { it.isNotBlank() }.joinToString(",")
             val prediction = Prediction(
                 id = editingPredictionId ?: 0L,
-                question = s.question.trim(),
+                title = s.question.trim(),
+                description = s.description.trim(),
                 createdAt = if (editingPredictionId != null) s.createdAt else Instant.now(),
                 reminderAt = s.reminderAt,
                 resolvedAt = s.resolvedAt,

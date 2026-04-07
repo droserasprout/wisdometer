@@ -13,13 +13,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import com.wisdometer.data.model.tagList
 import com.wisdometer.ui.components.ProbabilityBar
 import com.wisdometer.ui.components.StatusBadge
 import com.wisdometer.share.ShareImageRenderer
 import com.wisdometer.ui.theme.BarColors
 import com.wisdometer.ui.theme.WisdometerTypography
+
+private val dateFmt = DateTimeFormatter.ofPattern("MMM d, yyyy").withZone(ZoneId.systemDefault())
 
 @Composable
 fun PredictionDetailScreen(
@@ -49,7 +54,7 @@ fun PredictionDetailScreen(
                     IconButton(onClick = {
                         ShareImageRenderer.sharePredictionCard(
                             context = ctx,
-                            question = pw.prediction.question,
+                            question = pw.prediction.title,
                             options = pw.sortedOptions.map { it.label to it.probability },
                             isResolved = pw.isResolved,
                             actualOptionLabel = pw.actualOption?.label,
@@ -73,14 +78,33 @@ fun PredictionDetailScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        pw.prediction.question,
+                        pw.prediction.title,
                         style = WisdometerTypography.headlineMedium,
                         modifier = Modifier.weight(1f),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     StatusBadge(isResolved = pw.isResolved)
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                if (pw.prediction.description.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(pw.prediction.description, style = WisdometerTypography.bodyMedium)
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        "📅 ${dateFmt.format(pw.prediction.createdAt)}",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    pw.prediction.updatedAt?.let {
+                        Text(
+                            "✏️ ${dateFmt.format(it)}",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
 
                 val topOptionId = pw.sortedOptions.maxByOrNull { it.probability }?.id
                 pw.sortedOptions.forEachIndexed { index, option ->

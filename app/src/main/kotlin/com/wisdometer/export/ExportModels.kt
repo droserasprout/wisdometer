@@ -14,7 +14,9 @@ data class ExportFile(
 data class ExportedPrediction(
     val id: Long,
     val question: String,
+    val description: String = "",
     @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String? = null,
     @SerialName("reminder_at") val reminderAt: String? = null,
     @SerialName("resolved_at") val resolvedAt: String? = null,
     @SerialName("outcome_option_id") val outcomeOptionId: Long? = null,

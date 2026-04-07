@@ -1,5 +1,6 @@
 package com.wisdometer.data.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.Instant
@@ -7,8 +8,10 @@ import java.time.Instant
 @Entity(tableName = "predictions")
 data class Prediction(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val question: String,
+    @ColumnInfo(name = "question") val title: String,
+    val description: String = "",
     val createdAt: Instant = Instant.now(),
+    val updatedAt: Instant? = null,
     val reminderAt: Instant? = null,
     val resolvedAt: Instant? = null,
     val outcomeOptionId: Long? = null,

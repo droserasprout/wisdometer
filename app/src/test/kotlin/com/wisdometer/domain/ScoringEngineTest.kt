@@ -17,7 +17,7 @@ class ScoringEngineTest {
     ): PredictionWithOptions {
         val prediction = Prediction(
             id = 1L,
-            question = "Q",
+            title = "Q",
             createdAt = Instant.EPOCH,
             resolvedAt = Instant.EPOCH,
             outcomeOptionId = (actualIndex + 1).toLong(),
@@ -85,9 +85,9 @@ class ScoringEngineTest {
 
     @Test
     fun `simpleClosenessForTag filters by tag`() {
-        val p1 = Prediction(id = 1, question = "Q1", createdAt = Instant.EPOCH, resolvedAt = Instant.EPOCH,
+        val p1 = Prediction(id = 1, title = "Q1", createdAt = Instant.EPOCH, resolvedAt = Instant.EPOCH,
             outcomeOptionId = 1L, tags = "career")
-        val p2 = Prediction(id = 2, question = "Q2", createdAt = Instant.EPOCH, resolvedAt = Instant.EPOCH,
+        val p2 = Prediction(id = 2, title = "Q2", createdAt = Instant.EPOCH, resolvedAt = Instant.EPOCH,
             outcomeOptionId = 3L, tags = "finance")
         val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Yes", probability = 100, sortOrder = 0)
         val opt2 = PredictionOption(id = 3, predictionId = 2, label = "No", probability = 10, sortOrder = 0)
@@ -101,9 +101,9 @@ class ScoringEngineTest {
 
     @Test
     fun `brierScoreForTag filters by tag`() {
-        val p1 = Prediction(id = 1, question = "Q1", createdAt = Instant.EPOCH, resolvedAt = Instant.EPOCH,
+        val p1 = Prediction(id = 1, title = "Q1", createdAt = Instant.EPOCH, resolvedAt = Instant.EPOCH,
             outcomeOptionId = 1L, tags = "career")
-        val p2 = Prediction(id = 2, question = "Q2", createdAt = Instant.EPOCH, resolvedAt = Instant.EPOCH,
+        val p2 = Prediction(id = 2, title = "Q2", createdAt = Instant.EPOCH, resolvedAt = Instant.EPOCH,
             outcomeOptionId = 3L, tags = "finance")
         // p1: 100% on correct → (1-1)^2 + 0 = 0.0
         val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Yes", probability = 100, sortOrder = 0)
@@ -120,8 +120,8 @@ class ScoringEngineTest {
 
     @Test
     fun `avgConfidence is mean probability of top-ranked option`() {
-        val p1 = Prediction(id = 1, question = "Q", createdAt = Instant.EPOCH)
-        val p2 = Prediction(id = 2, question = "Q2", createdAt = Instant.EPOCH)
+        val p1 = Prediction(id = 1, title = "Q", createdAt = Instant.EPOCH)
+        val p2 = Prediction(id = 2, title = "Q2", createdAt = Instant.EPOCH)
         val opts1 = listOf(
             PredictionOption(id = 1, predictionId = 1, label = "Yes", probability = 80, sortOrder = 0),
             PredictionOption(id = 2, predictionId = 1, label = "No", probability = 20, sortOrder = 1),
@@ -137,9 +137,9 @@ class ScoringEngineTest {
 
     @Test
     fun `accuracyOverTime returns cumulative rolling average by resolution date`() {
-        val p1 = Prediction(id = 1, question = "Q1", createdAt = Instant.EPOCH,
+        val p1 = Prediction(id = 1, title = "Q1", createdAt = Instant.EPOCH,
             resolvedAt = Instant.ofEpochMilli(1000), outcomeOptionId = 1)
-        val p2 = Prediction(id = 2, question = "Q2", createdAt = Instant.EPOCH,
+        val p2 = Prediction(id = 2, title = "Q2", createdAt = Instant.EPOCH,
             resolvedAt = Instant.ofEpochMilli(2000), outcomeOptionId = 3)
         val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Y", probability = 100, sortOrder = 0)
         val opt2 = PredictionOption(id = 3, predictionId = 2, label = "N", probability = 50, sortOrder = 0)
@@ -154,9 +154,9 @@ class ScoringEngineTest {
 
     @Test
     fun `accuracyOverCount returns cumulative rolling average by prediction count`() {
-        val p1 = Prediction(id = 1, question = "Q1", createdAt = Instant.EPOCH,
+        val p1 = Prediction(id = 1, title = "Q1", createdAt = Instant.EPOCH,
             resolvedAt = Instant.ofEpochMilli(1000), outcomeOptionId = 1)
-        val p2 = Prediction(id = 2, question = "Q2", createdAt = Instant.EPOCH,
+        val p2 = Prediction(id = 2, title = "Q2", createdAt = Instant.EPOCH,
             resolvedAt = Instant.ofEpochMilli(2000), outcomeOptionId = 3)
         val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Y", probability = 100, sortOrder = 0)
         val opt2 = PredictionOption(id = 3, predictionId = 2, label = "N", probability = 50, sortOrder = 0)

@@ -31,7 +31,7 @@ class JsonImporterTest {
         val items = converter.fromExportFile(exportFile)
         assertEquals(1, items.size)
         val item = items[0]
-        assertEquals("Test?", item.prediction.question)
+        assertEquals("Test?", item.prediction.title)
         assertEquals("a,b", item.prediction.tags)
         assertNull(item.prediction.resolvedAt)
         assertEquals(2, item.options.size)

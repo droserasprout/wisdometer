@@ -3,6 +3,7 @@ package com.wisdometer.di
 import android.content.Context
 import androidx.room.Room
 import com.wisdometer.data.dao.PredictionDao
+import com.wisdometer.data.db.MIGRATION_1_2
 import com.wisdometer.data.db.WisdometerDatabase
 import dagger.Module
 import dagger.Provides
@@ -18,7 +19,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): WisdometerDatabase =
-        Room.databaseBuilder(context, WisdometerDatabase::class.java, "wisdometer.db").build()
+        Room.databaseBuilder(context, WisdometerDatabase::class.java, "wisdometer.db")
+            .addMigrations(MIGRATION_1_2)
+            .build()
 
     @Provides
     fun providePredictionDao(db: WisdometerDatabase): PredictionDao = db.predictionDao()

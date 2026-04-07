@@ -60,7 +60,15 @@ fun EditPredictionScreen(
             OutlinedTextField(
                 value = state.question,
                 onValueChange = viewModel::setQuestion,
-                label = { Text("Question") },
+                label = { Text("Title") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = state.description,
+                onValueChange = viewModel::setDescription,
+                label = { Text("Description (optional)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
             )
