@@ -22,14 +22,17 @@ Always use the Makefile — it sets JAVA_HOME and ANDROID_HOME correctly.
 
 ## Key Conventions
 
-- **Room column naming**: Use `@ColumnInfo(name = "snake_case")` when Kotlin field name differs from desired column name. Migrations must match.
-- **DB version**: Currently 2. Migrations live in `data/db/WisdometerDatabase.kt`.
+- **Room column naming**: Use `@ColumnInfo(name = "snake_case")` when Kotlin field name differs from desired column name.
+- **DB**: Version 1, pre-release — uses `fallbackToDestructiveMigration()`. No migration files needed until post-release.
 - **Prediction.title**: Field is `title` in Kotlin, column is `question` in DB (historical rename with `@ColumnInfo`).
 - **Tags**: Stored as comma-separated string in DB, converted via `Prediction.tagList` extension property.
 - **Card colors**: Always pass explicit `containerColor = MaterialTheme.colorScheme.surface` to `Card` — Material3 default differs from our theme's `surface`.
 - **Button shapes**: Material3 `Button` ignores `MaterialTheme.shapes` — pass `shape = RoundedCornerShape(8.dp)` directly.
 - **Metadata labels**: Use `MaterialTheme.typography.labelSmall` + `MaterialTheme.colorScheme.onSurfaceVariant` for all secondary metadata (tags, dates, stats).
 - **Canvas text**: Use `rememberTextMeasurer()` + `drawText()` for chart axis labels (not `nativeCanvas`).
+- **Navigation**: `HorizontalPager` for 3 tab screens (Predictions/Profile/Settings) with swipe; `NavHost` for overlay routes (Detail/Edit).
+- **Welcome screen**: Gated by `welcome_seen` key in `wisdometer_settings` SharedPreferences.
+- **SharedPreferences**: All settings use `wisdometer_settings` prefs file (`SettingsViewModel`, `NavGraph`).
 
 ## Testing
 

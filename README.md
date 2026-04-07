@@ -11,6 +11,8 @@ Offline Android app for tracking personal predictions. Works like a prediction m
 - Dashboard-style profile with donut accuracy ring, stat tiles, calibration chart, confidence distribution, and accuracy over time
 - Tag predictions and see accuracy broken down by tag
 - Optional description field for extra context
+- Swipe between tabs (Predictions, Profile, Settings)
+- One-time welcome screen explaining core concepts
 - Export / import as JSON
 - Share predictions and stats as images
 - Compact / normal list density toggle
@@ -21,7 +23,7 @@ Offline Android app for tracking personal predictions. Works like a prediction m
 - **Language:** Kotlin
 - **UI:** Jetpack Compose with Material3 dark theme
 - **Architecture:** MVVM — ViewModel + StateFlow + Repository
-- **Database:** Room (SQLite), currently at schema version 2
+- **Database:** Room (SQLite) with destructive migration fallback (pre-release)
 - **DI:** Hilt
 - **Background work:** WorkManager (reminder notifications)
 - **Serialization:** kotlinx.serialization (JSON export/import)
@@ -54,7 +56,7 @@ See `make tasks` for the full Gradle task list and `make env` to verify your env
 app/src/main/kotlin/com/wisdometer/
 ├── data/
 │   ├── dao/          Room DAO
-│   ├── db/           Database, type converters, migrations
+│   ├── db/           Database, type converters
 │   ├── model/        Prediction, PredictionOption, PredictionWithOptions
 │   └── repository/   PredictionRepository (interface + impl)
 ├── di/               Hilt modules (AppModule, DatabaseModule)
@@ -66,11 +68,12 @@ app/src/main/kotlin/com/wisdometer/
     ├── components/   PredictionCard, ProbabilityBar, StatusBadge
     ├── detail/       Prediction detail screen
     ├── edit/         New / edit prediction screen
-    ├── navigation/   NavGraph
+    ├── navigation/   NavGraph (HorizontalPager + NavHost)
     ├── predictions/  Prediction list screen
     ├── profile/      Profile screen, AccuracyChart, CalibrationChart, ConfidenceChart
     ├── settings/     Settings screen
-    └── theme/        Colors, typography, theme
+    ├── theme/        Colors, typography, theme
+    └── welcome/      One-time welcome screen
 ```
 
 ## Accuracy scoring
