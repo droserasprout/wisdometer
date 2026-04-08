@@ -3,6 +3,7 @@ package com.wisdometer.data.repository
 import com.wisdometer.data.model.Prediction
 import com.wisdometer.data.model.PredictionOption
 import com.wisdometer.data.model.PredictionWithOptions
+import com.wisdometer.export.ImportedPrediction
 import kotlinx.coroutines.flow.Flow
 
 interface PredictionRepository {
@@ -12,5 +13,5 @@ interface PredictionRepository {
     suspend fun deletePrediction(prediction: Prediction)
     suspend fun getAllResolved(): List<PredictionWithOptions>
     suspend fun getAll(): List<PredictionWithOptions>
-    suspend fun importPredictions(items: List<PredictionWithOptions>)
+    suspend fun importPredictions(items: List<ImportedPrediction>)
 }

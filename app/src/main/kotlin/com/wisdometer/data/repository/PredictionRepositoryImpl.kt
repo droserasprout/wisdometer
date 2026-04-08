@@ -4,6 +4,7 @@ import com.wisdometer.data.dao.PredictionDao
 import com.wisdometer.data.model.Prediction
 import com.wisdometer.data.model.PredictionOption
 import com.wisdometer.data.model.PredictionWithOptions
+import com.wisdometer.export.ImportedPrediction
 import com.wisdometer.notifications.NotificationScheduler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -47,17 +48,28 @@ class PredictionRepositoryImpl @Inject constructor(
     override suspend fun getAll(): List<PredictionWithOptions> =
         getAllPredictions().first()
 
-    override suspend fun importPredictions(items: List<PredictionWithOptions>) {
-        for (item in items) {
+    override suspend fun importPredictions(items: List<ImportedPrediction>) {
+        for (imported in items) {
+            val pred = imported.item.prediction
             val existing = dao.countByQuestionAndCreatedAt(
-                item.prediction.title,
-                item.prediction.createdAt.toEpochMilli(),
+                pred.title,
+                pred.createdAt.toEpochMilli(),
             )
             if (existing == 0) {
-                dao.upsertPredictionWithOptions(
-                    item.prediction.copy(id = 0),
-                    item.options.map { it.copy(id = 0, predictionId = 0) },
+                val newPredictionId = dao.upsertPredictionWithOptions(
+                    pred.copy(id = 0, outcomeOptionId = null),
+                    imported.item.options.map { it.copy(id = 0, predictionId = 0) },
                 )
+                // Remap outcome by index → new option ID
+                val outcomeIndex = imported.outcomeOptionIndex
+                if (outcomeIndex != null && pred.resolvedAt != null) {
+                    val newOptions = dao.getOptionsForPrediction(newPredictionId)
+                    val newOutcomeId = newOptions.sortedBy { it.sortOrder }
+                        .getOrNull(outcomeIndex)?.id
+                    if (newOutcomeId != null) {
+                        dao.updateOutcomeOptionId(newPredictionId, newOutcomeId)
+                    }
+                }
             }
         }
     }

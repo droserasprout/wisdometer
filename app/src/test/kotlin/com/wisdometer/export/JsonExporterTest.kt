@@ -30,7 +30,7 @@ class JsonExporterTest {
         val ep = exportFile.predictions[0]
         assertEquals("Will I find a job?", ep.question)
         assertEquals(listOf("career", "finance"), ep.tags)
-        assertEquals(2L, ep.outcomeOptionId)
+        assertEquals(1, ep.outcomeOptionIndex) // "Yes" is at sortOrder index 1
         assertEquals("2026-06-01T00:00:00Z", ep.resolvedAt)
         assertEquals(2, ep.options.size)
         assertEquals("No", ep.options[0].label)

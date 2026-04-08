@@ -63,6 +63,12 @@ interface PredictionDao {
     @Query("SELECT COUNT(*) FROM predictions WHERE question = :question AND createdAt = :createdAt")
     suspend fun countByQuestionAndCreatedAt(question: String, createdAt: Long): Int
 
+    @Query("SELECT * FROM prediction_options WHERE predictionId = :predictionId")
+    suspend fun getOptionsForPrediction(predictionId: Long): List<PredictionOption>
+
+    @Query("UPDATE predictions SET outcomeOptionId = :outcomeOptionId WHERE id = :predictionId")
+    suspend fun updateOutcomeOptionId(predictionId: Long, outcomeOptionId: Long)
+
     @Transaction
     @Query("SELECT * FROM predictions WHERE resolvedAt IS NOT NULL")
     suspend fun getAllResolvedWithOptions(): List<PredictionWithOptions>

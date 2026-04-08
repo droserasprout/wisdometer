@@ -1,7 +1,5 @@
 package com.wisdometer.export
 
-import com.wisdometer.data.model.Prediction
-import com.wisdometer.data.model.PredictionOption
 import com.wisdometer.data.model.PredictionWithOptions
 import org.junit.Assert.*
 import org.junit.Test
@@ -28,9 +26,9 @@ class JsonImporterTest {
                 )
             ),
         )
-        val items = converter.fromExportFile(exportFile)
-        assertEquals(1, items.size)
-        val item = items[0]
+        val imported = converter.fromExportFile(exportFile)
+        assertEquals(1, imported.size)
+        val item = imported[0].item
         assertEquals("Test?", item.prediction.title)
         assertEquals("a,b", item.prediction.tags)
         assertNull(item.prediction.resolvedAt)
@@ -40,7 +38,7 @@ class JsonImporterTest {
     }
 
     @Test
-    fun `fromExportFile preserves resolved_at and outcome_option_id`() {
+    fun `fromExportFile preserves resolved_at and outcome index`() {
         val exportFile = ExportFile(
             version = 1,
             exportedAt = "2026-04-06T12:00:00Z",
@@ -49,15 +47,16 @@ class JsonImporterTest {
                     id = 1L, question = "Q",
                     createdAt = "2026-01-01T00:00:00Z",
                     resolvedAt = "2026-03-01T00:00:00Z",
-                    outcomeOptionId = 1L,
+                    outcomeOptionIndex = 0,
                     tags = emptyList(),
                     options = listOf(ExportedOption("Yes", 100, 0)),
                 )
             ),
         )
-        val items = converter.fromExportFile(exportFile)
-        assertNotNull(items[0].prediction.resolvedAt)
-        assertEquals(1L, items[0].prediction.outcomeOptionId)
+        val imported = converter.fromExportFile(exportFile)
+        assertNotNull(imported[0].item.prediction.resolvedAt)
+        assertNull(imported[0].item.prediction.outcomeOptionId) // resolved by repository after insert
+        assertEquals(0, imported[0].outcomeOptionIndex)
     }
 
     @Test
@@ -74,9 +73,9 @@ class JsonImporterTest {
                 )
             ),
         )
-        val items = converter.fromExportFile(exportFile)
-        assertEquals(0L, items[0].prediction.id)
-        assertEquals(0L, items[0].options[0].id)
-        assertEquals(0L, items[0].options[0].predictionId)
+        val imported = converter.fromExportFile(exportFile)
+        assertEquals(0L, imported[0].item.prediction.id)
+        assertEquals(0L, imported[0].item.options[0].id)
+        assertEquals(0L, imported[0].item.options[0].predictionId)
     }
 }

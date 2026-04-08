@@ -23,8 +23,8 @@ class JsonImporter @Inject constructor(
         } ?: error("Cannot open input stream for URI: $uri")
 
         val exportFile = json.decodeFromString(ExportFile.serializer(), jsonString)
-        val items = converter.fromExportFile(exportFile)
-        repository.importPredictions(items)
-        return items.size
+        val imported = converter.fromExportFile(exportFile)
+        repository.importPredictions(imported)
+        return imported.size
     }
 }

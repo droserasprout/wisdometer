@@ -7,12 +7,21 @@ import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Imported prediction with optional outcome index (used to remap outcomeOptionId after insert). */
+data class ImportedPrediction(
+    val item: PredictionWithOptions,
+    val outcomeOptionIndex: Int? = null,
+)
+
 @Singleton
 class JsonConverter @Inject constructor() {
 
     fun toExportFile(items: List<PredictionWithOptions>): ExportFile = ExportFile(
         exportedAt = Instant.now().toString(),
         predictions = items.map { item ->
+            val outcomeIndex = item.prediction.outcomeOptionId?.let { outcomeId ->
+                item.sortedOptions.indexOfFirst { it.id == outcomeId }.takeIf { it >= 0 }
+            }
             ExportedPrediction(
                 id = item.prediction.id,
                 question = item.prediction.title,
@@ -21,7 +30,7 @@ class JsonConverter @Inject constructor() {
                 updatedAt = item.prediction.updatedAt?.toString(),
                 reminderAt = item.prediction.reminderAt?.toString(),
                 resolvedAt = item.prediction.resolvedAt?.toString(),
-                outcomeOptionId = item.prediction.outcomeOptionId,
+                outcomeOptionIndex = outcomeIndex,
                 tags = if (item.prediction.tags.isBlank()) emptyList()
                        else item.prediction.tags.split(",").map { it.trim() }.filter { it.isNotBlank() },
                 options = item.sortedOptions.map { opt ->
@@ -31,7 +40,7 @@ class JsonConverter @Inject constructor() {
         },
     )
 
-    fun fromExportFile(file: ExportFile): List<PredictionWithOptions> =
+    fun fromExportFile(file: ExportFile): List<ImportedPrediction> =
         file.predictions.map { ep ->
             val prediction = Prediction(
                 id = 0,
@@ -41,7 +50,6 @@ class JsonConverter @Inject constructor() {
                 updatedAt = ep.updatedAt?.let { Instant.parse(it) },
                 reminderAt = ep.reminderAt?.let { Instant.parse(it) },
                 resolvedAt = ep.resolvedAt?.let { Instant.parse(it) },
-                outcomeOptionId = ep.outcomeOptionId,
                 tags = ep.tags.joinToString(","),
             )
             val options = ep.options.mapIndexed { i, opt ->
@@ -53,6 +61,9 @@ class JsonConverter @Inject constructor() {
                     sortOrder = opt.sortOrder.takeIf { it >= 0 } ?: i,
                 )
             }
-            PredictionWithOptions(prediction, options)
+            ImportedPrediction(
+                item = PredictionWithOptions(prediction, options),
+                outcomeOptionIndex = ep.outcomeOptionIndex,
+            )
         }
 }
