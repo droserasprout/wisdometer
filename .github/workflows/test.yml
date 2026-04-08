@@ -27,3 +27,12 @@ jobs:
 
       - name: Run lint
         run: ./gradlew lintDebug
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: wisdometer-debug
+          path: app/build/outputs/apk/debug/*.apk
