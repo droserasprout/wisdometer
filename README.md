@@ -32,7 +32,7 @@ Offline Android app for tracking personal predictions. Works like a prediction m
 
 ## Requirements
 
-- JDK 17 (`/usr/lib/jvm/java-17-openjdk`)
+- JDK 21 (`/usr/lib/jvm/java-21-openjdk`)
 - Android SDK with platform-tools (`~/Android/Sdk`)
 - A connected device or emulator for `make install`
 
