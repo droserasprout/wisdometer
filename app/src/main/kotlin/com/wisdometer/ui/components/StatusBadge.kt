@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.wisdometer.ui.theme.LocalWisdometerColors
+import com.wisdometer.ui.theme.WisdometerTypography
 
 @Composable
 fun StatusBadge(isResolved: Boolean, modifier: Modifier = Modifier) {
@@ -20,7 +20,7 @@ fun StatusBadge(isResolved: Boolean, modifier: Modifier = Modifier) {
 
     Text(
         text = label,
-        fontSize = 10.sp,
+        style = WisdometerTypography.labelMedium,
         color = text,
         modifier = modifier
             .clip(RoundedCornerShape(4.dp))

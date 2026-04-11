@@ -10,12 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.sp
 import com.wisdometer.ui.theme.BarColors
 import com.wisdometer.ui.theme.LocalWisdometerColors
+import com.wisdometer.ui.theme.WisdometerTypography
 
 /**
  * Bar chart of how often the user's top option falls in each 10%-wide probability bucket.
@@ -29,7 +28,7 @@ fun ConfidenceChart(
     val allZero = distribution.all { it.second == 0 }
     if (distribution.isEmpty() || allZero) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
-            Text("No predictions yet", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("No predictions yet", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         return
     }
@@ -38,7 +37,7 @@ fun ConfidenceChart(
     val gridColor = LocalWisdometerColors.current.chartGridLine
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
     val textMeasurer = rememberTextMeasurer()
-    val labelStyle = TextStyle(fontSize = 10.sp, color = labelColor)
+    val labelStyle = WisdometerTypography.labelMedium.copy(color = labelColor)
 
     Canvas(modifier = modifier) {
         val w = size.width

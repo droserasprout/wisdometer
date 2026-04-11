@@ -16,9 +16,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wisdometer.share.ShareImageRenderer
 import com.wisdometer.ui.theme.BarColors
@@ -48,6 +46,8 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
@@ -113,7 +113,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // 2×2 stat tiles
         val statTiles = listOf(
@@ -143,6 +143,8 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Accuracy over time", style = WisdometerTypography.titleMedium)
@@ -180,10 +182,12 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         }
 
         // Calibration chart
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Calibration", style = WisdometerTypography.titleMedium)
@@ -201,10 +205,12 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         }
 
         // Confidence distribution
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Confidence distribution", style = WisdometerTypography.titleMedium)
@@ -223,10 +229,12 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
 
         // Tag accuracy breakdown
         if (state.tagAccuracies.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("By Tag", style = WisdometerTypography.titleMedium)
@@ -289,6 +297,7 @@ private fun StatTile(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column {
             // Colored top border
@@ -305,8 +314,7 @@ private fun StatTile(
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
                     value,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = WisdometerTypography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(

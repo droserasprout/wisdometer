@@ -10,9 +10,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.wisdometer.ui.theme.WisdometerTypography
 
 @Composable
 fun ProbabilityBar(
@@ -34,6 +35,8 @@ fun ProbabilityBar(
         else -> ""
     }
 
+    val textStyle: TextStyle = if (compact) WisdometerTypography.labelSmall else WisdometerTypography.bodyLarge
+
     Column(modifier = modifier.padding(vertical = verticalPadding)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -42,12 +45,12 @@ fun ProbabilityBar(
         ) {
             Text(
                 text = "$prefix$label",
-                fontSize = if (compact) 11.sp else 13.sp,
+                style = textStyle,
                 color = if (isActualOutcome) barColor else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = "$probability%",
-                fontSize = if (compact) 11.sp else 13.sp,
+                style = textStyle,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }

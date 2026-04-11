@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.wisdometer.ui.theme.WisdometerTypography
 
 @Composable
@@ -27,9 +26,7 @@ fun WelcomeScreen(onGetStarted: () -> Unit) {
         ) {
             Text(
                 "Wisdometer",
-                style = WisdometerTypography.headlineLarge,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
+                style = WisdometerTypography.displaySmall,
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(

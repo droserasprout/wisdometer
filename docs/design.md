@@ -49,20 +49,16 @@ Custom `WisdometerTypography` overriding Material3 defaults:
 
 | Style | Size | Weight | Used for |
 |-------|------|--------|----------|
+| displaySmall | 32sp | Bold | Welcome screen title |
 | headlineLarge | 24sp | Bold | Screen titles (Predictions, Profile, Settings) |
 | headlineMedium | 20sp | SemiBold | Card titles, section headers |
+| titleLarge | 28sp | Bold | Stat tile values |
 | titleMedium | 16sp | Medium | Section subtitles (Options, Calibration) |
+| bodyLarge | 13sp | Normal | Probability bar text (expanded) |
 | bodyMedium | 14sp | Normal | Body text, descriptions |
-| bodySmall | 12sp | Normal | Secondary descriptions |
+| bodySmall | 12sp | Normal | Secondary descriptions, chart empty states |
+| labelMedium | 10sp | Medium | Badge text, chart axis labels |
 | labelSmall | 11sp | Medium | Metadata labels, tags, dates |
-
-### Special Sizes (inline)
-
-| Size | Weight | Usage |
-|------|--------|-------|
-| 32sp | Bold | Welcome screen title |
-| 28sp | Bold | Stat tile values |
-| 10sp | Medium | Badge text, chart axis labels |
 
 ## Shapes
 
@@ -88,7 +84,7 @@ Custom `WisdometerTypography` overriding Material3 defaults:
 ### StatusBadge
 
 - Displays "OPEN" or "RESOLVED" (uppercase)
-- Font: 10sp, Medium weight
+- Font: labelMedium (10sp, Medium)
 - Padding: 6dp horizontal, 2dp vertical
 - Corner radius: 4dp
 - Colors from LocalWisdometerColors (badge background/text pairs)
@@ -96,6 +92,7 @@ Custom `WisdometerTypography` overriding Material3 defaults:
 ### ProbabilityBar
 
 - Label + percentage text + colored bar
+- Text: labelSmall (compact), bodyLarge (expanded)
 - Bar colors cycle through BarColors palette (6 colors)
 - Compact bar height: 6dp; regular: 10dp
 - Vertical padding: 2dp (compact), 4dp (regular)
@@ -108,7 +105,7 @@ Custom `WisdometerTypography` overriding Material3 defaults:
 - Card corner radius: 12dp
 - Accent bar height: 3dp
 - Inner padding: 12dp
-- Value: 28sp Bold
+- Value: titleLarge (28sp Bold)
 - Label: labelSmall
 
 ### AccuracyDonut
@@ -146,7 +143,7 @@ Custom `WisdometerTypography` overriding Material3 defaults:
 ```text
 Surface(fillMaxSize)
   Column(fillMaxSize, padding: 32dp, verticalArrangement: Center)
-    Title: "Wisdometer" (32sp, Bold)
+    Title: "Wisdometer" (displaySmall)
     Subtitle: bodyMedium, onSurfaceVariant
     Spacer(40dp)
     4x ConceptItem (title: titleMedium + body: bodyMedium)
@@ -267,6 +264,8 @@ Column(fillMaxSize, padding 16dp)
 | Item spacing | 8dp |
 | Metadata style | labelSmall + onSurfaceVariant |
 | Chart canvas heights | 180–200dp |
+| Chart axis labels | labelMedium (via WisdometerTypography) |
+| Chart empty states | bodySmall + onSurfaceVariant |
 | Probability input width | 72dp |
 | AccuracyDonut size | 72dp |
-| Stat tile value | 28sp Bold |
+| Stat tile value | titleLarge |

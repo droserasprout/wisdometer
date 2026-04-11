@@ -11,13 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.sp
 import com.wisdometer.domain.CalibrationPoint
 import com.wisdometer.ui.theme.BarColors
 import com.wisdometer.ui.theme.LocalWisdometerColors
+import com.wisdometer.ui.theme.WisdometerTypography
 
 /**
  * Calibration chart: predicted probability (X) vs actual hit rate (Y).
@@ -30,7 +29,7 @@ fun CalibrationChart(
 ) {
     if (points.isEmpty()) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
-            Text("No resolved predictions yet", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("No resolved predictions yet", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         return
     }
@@ -40,7 +39,7 @@ fun CalibrationChart(
     val diagonalColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
     val textMeasurer = rememberTextMeasurer()
-    val labelStyle = TextStyle(fontSize = 10.sp, color = labelColor)
+    val labelStyle = WisdometerTypography.labelMedium.copy(color = labelColor)
 
     Canvas(modifier = modifier) {
         val w = size.width
