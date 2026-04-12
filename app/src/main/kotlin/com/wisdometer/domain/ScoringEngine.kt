@@ -15,12 +15,12 @@ data class CalibrationPoint(
 @Singleton
 class ScoringEngine @Inject constructor() {
 
-    /** Score = probability_of_actual_outcome / 100, averaged across resolved predictions. */
+    /** Score = normalized probability of actual outcome, averaged across resolved predictions. */
     fun simpleCloseness(resolved: List<PredictionWithOptions>): Double {
         if (resolved.isEmpty()) return 0.0
         return resolved.map { item ->
             val actual = item.actualOption ?: return@map 0.0
-            actual.probability / 100.0
+            item.normalizedProbabilities[actual.id] ?: 0.0
         }.average()
     }
 
@@ -30,10 +30,11 @@ class ScoringEngine @Inject constructor() {
         if (resolved.isEmpty()) return 0.0
         return resolved.map { item ->
             val actual = item.actualOption ?: return@map 2.0
-            val pActual = actual.probability / 100.0
+            val probs = item.normalizedProbabilities
+            val pActual = probs[actual.id] ?: 0.0
             val sumOthersSq = item.options
                 .filter { it.id != actual.id }
-                .sumOf { (it.probability / 100.0).let { p -> p * p } }
+                .sumOf { (probs[it.id] ?: 0.0).let { p -> p * p } }
             (pActual - 1.0).let { it * it } + sumOthersSq
         }.average()
     }
@@ -48,11 +49,11 @@ class ScoringEngine @Inject constructor() {
         return brierScore(resolved)
     }
 
-    /** Mean probability of the top-ranked option across ALL predictions (resolved or not). */
+    /** Mean weight of the top-ranked option across ALL predictions (resolved or not). Range: 1.0–10.0. */
     fun avgConfidence(items: List<PredictionWithOptions>): Double {
         if (items.isEmpty()) return 0.0
         return items.map { item ->
-            item.options.maxOfOrNull { it.probability }?.toDouble() ?: 0.0
+            item.options.maxOfOrNull { it.weight }?.toDouble() ?: 0.0
         }.average()
     }
 
@@ -81,8 +82,10 @@ class ScoringEngine @Inject constructor() {
     fun calibrationData(resolved: List<PredictionWithOptions>): List<CalibrationPoint> {
         val buckets = Array(10) { mutableListOf<Boolean>() }
         for (item in resolved) {
+            val pcts = item.normalizedPercentages
             for (option in item.options) {
-                val b = (option.probability / 10).coerceIn(0, 9)
+                val pct = pcts[option.id] ?: 0
+                val b = (pct / 10).coerceIn(0, 9)
                 buckets[b].add(option.id == item.prediction.outcomeOptionId)
             }
         }
@@ -93,22 +96,23 @@ class ScoringEngine @Inject constructor() {
     }
 
     /**
-     * For each 10%-wide bucket, how many predictions had their TOP option in that range?
-     * Returns list of (bucketMidpoint, count).
+     * For each weight level (1–10), how many predictions had their TOP option at that weight?
+     * Returns list of (weight, count).
      */
     fun confidenceDistribution(all: List<PredictionWithOptions>): List<Pair<Int, Int>> {
-        val counts = IntArray(10)
+        val counts = IntArray(10) // index 0 = weight 1, index 9 = weight 10
         for (item in all) {
-            val top = item.options.maxOfOrNull { it.probability } ?: continue
-            counts[(top / 10).coerceIn(0, 9)]++
+            val topWeight = item.options.maxOfOrNull { it.weight } ?: continue
+            counts[(topWeight - 1).coerceIn(0, 9)]++
         }
-        return counts.mapIndexed { i, n -> (i * 10 + 5) to n }
+        return counts.mapIndexed { i, n -> (i + 1) to n }
     }
 
     private fun cumulativeAccuracy(sortedResolved: List<PredictionWithOptions>): List<Double> {
         var runningSum = 0.0
         return sortedResolved.mapIndexed { i, item ->
-            val score = item.actualOption?.probability?.div(100.0) ?: 0.0
+            val actual = item.actualOption
+            val score = if (actual != null) item.normalizedProbabilities[actual.id] ?: 0.0 else 0.0
             runningSum += score
             runningSum / (i + 1)
         }

@@ -20,12 +20,12 @@ class JsonExporterTest {
             createdAt = Instant.parse("2026-01-01T00:00:00Z"),
         )
         val options = listOf(
-            PredictionOption(id = 1L, predictionId = 1L, label = "No", probability = 60, sortOrder = 0),
-            PredictionOption(id = 2L, predictionId = 1L, label = "Yes", probability = 40, sortOrder = 1),
+            PredictionOption(id = 1L, predictionId = 1L, label = "No", weight = 6, sortOrder = 0),
+            PredictionOption(id = 2L, predictionId = 1L, label = "Yes", weight = 4, sortOrder = 1),
         )
         val exportFile = converter.toExportFile(listOf(PredictionWithOptions(prediction, options)))
 
-        assertEquals(1, exportFile.version)
+        assertEquals(2, exportFile.version)
         assertEquals(1, exportFile.predictions.size)
         val ep = exportFile.predictions[0]
         assertEquals("Will I find a job?", ep.question)
@@ -34,13 +34,14 @@ class JsonExporterTest {
         assertEquals("2026-06-01T00:00:00Z", ep.resolvedAt)
         assertEquals(2, ep.options.size)
         assertEquals("No", ep.options[0].label)
-        assertEquals(60, ep.options[0].probability)
+        assertEquals(6, ep.options[0].weight)
+        assertEquals(60, ep.options[0].probability)  // 6/(6+4) = 60%
     }
 
     @Test
     fun `toExportFile with empty tags produces empty list`() {
         val prediction = Prediction(id = 1L, title = "Q", tags = "", createdAt = Instant.EPOCH)
-        val opt = PredictionOption(id = 1L, predictionId = 1L, label = "Y", probability = 100, sortOrder = 0)
+        val opt = PredictionOption(id = 1L, predictionId = 1L, label = "Y", weight = 10, sortOrder = 0)
         val file = converter.toExportFile(listOf(PredictionWithOptions(prediction, listOf(opt))))
         assertEquals(emptyList<String>(), file.predictions[0].tags)
     }
@@ -48,7 +49,7 @@ class JsonExporterTest {
     @Test
     fun `JSON round-trip preserves all fields`() {
         val prediction = Prediction(id = 1L, title = "Round trip?", tags = "test", createdAt = Instant.EPOCH)
-        val opt = PredictionOption(id = 1L, predictionId = 1L, label = "Yes", probability = 100, sortOrder = 0)
+        val opt = PredictionOption(id = 1L, predictionId = 1L, label = "Yes", weight = 10, sortOrder = 0)
         val original = converter.toExportFile(listOf(PredictionWithOptions(prediction, listOf(opt))))
         val json = Json.encodeToString(ExportFile.serializer(), original)
         val decoded = Json.decodeFromString(ExportFile.serializer(), json)

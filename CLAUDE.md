@@ -23,8 +23,9 @@ Always use the Makefile — it sets JAVA_HOME and ANDROID_HOME correctly.
 ## Key Conventions
 
 - **Room column naming**: Use `@ColumnInfo(name = "snake_case")` when Kotlin field name differs from desired column name.
-- **DB**: Version 1, pre-release — uses `fallbackToDestructiveMigration()`. No migration files needed until post-release.
+- **DB**: Version 2, pre-release — uses `fallbackToDestructiveMigration()` with explicit migrations for schema changes (e.g. `MIGRATION_1_2`). Preserve user data.
 - **Prediction.title**: Field is `title` in Kotlin, column is `question` in DB (historical rename with `@ColumnInfo`).
+- **Option weights**: `PredictionOption.weight` is 1–10; normalized to percentages via `PredictionWithOptions.normalizedProbabilities` (0.0–1.0) and `normalizedPercentages` (0–100). Never store raw percentages.
 - **Tags**: Stored as comma-separated string in DB, converted via `Prediction.tagList` extension property.
 - **Card colors**: Always pass explicit `containerColor = MaterialTheme.colorScheme.surface` to `Card` — Material3 default differs from our theme's `surface`.
 - **Button shapes**: Material3 `Button` ignores `MaterialTheme.shapes` — pass `shape = RoundedCornerShape(8.dp)` directly.

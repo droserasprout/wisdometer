@@ -21,6 +21,6 @@ data class PredictionOption(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val predictionId: Long,
     val label: String,
-    val probability: Int,  // 0–100; all options for a prediction must sum to 100
+    val weight: Int,  // 1–10; normalized to percentages for scoring and display
     val sortOrder: Int,
 )

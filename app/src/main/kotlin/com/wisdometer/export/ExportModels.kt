@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ExportFile(
-    val version: Int = 1,
+    val version: Int = 2,
     @SerialName("exported_at") val exportedAt: String,
     val predictions: List<ExportedPrediction>,
 )
@@ -27,6 +27,7 @@ data class ExportedPrediction(
 @Serializable
 data class ExportedOption(
     val label: String,
-    val probability: Int,
+    val weight: Int,
+    val probability: Int,  // normalized from weight, for human readability
     @SerialName("sort_order") val sortOrder: Int,
 )

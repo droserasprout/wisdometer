@@ -20,8 +20,8 @@ import com.wisdometer.data.model.tagList
 import com.wisdometer.ui.components.ProbabilityBar
 import com.wisdometer.ui.components.StatusBadge
 import com.wisdometer.share.ShareImageRenderer
-import com.wisdometer.ui.theme.BarColors
 import com.wisdometer.ui.theme.WisdometerTypography
+import com.wisdometer.ui.theme.weightColor
 
 private val dateFmt = DateTimeFormatter.ofPattern("MMM d, yyyy").withZone(ZoneId.systemDefault())
 
@@ -54,7 +54,7 @@ fun PredictionDetailScreen(
                         ShareImageRenderer.sharePredictionCard(
                             context = ctx,
                             question = pw.prediction.title,
-                            options = pw.sortedOptions.map { it.label to it.probability },
+                            options = pw.sortedOptions.map { it.label to it.weight },
                             isResolved = pw.isResolved,
                             actualOptionLabel = pw.actualOption?.label,
                         )
@@ -105,12 +105,14 @@ fun PredictionDetailScreen(
                 }
                 Spacer(modifier = Modifier.height(12.dp))
 
-                val topOptionId = pw.sortedOptions.maxByOrNull { it.probability }?.id
+                val pctMap = pw.normalizedPercentages
+                val topOptionId = pw.sortedOptions.maxByOrNull { it.weight }?.id
                 pw.sortedOptions.forEachIndexed { index, option ->
                     ProbabilityBar(
                         label = option.label,
-                        probability = option.probability,
-                        barColor = BarColors[index % BarColors.size],
+                        probability = pctMap[option.id] ?: 0,
+                        weight = option.weight,
+                        barColor = weightColor(option.weight),
                         isActualOutcome = option.id == pw.prediction.outcomeOptionId,
                         isTopPrediction = option.id == topOptionId,
                         compact = false,

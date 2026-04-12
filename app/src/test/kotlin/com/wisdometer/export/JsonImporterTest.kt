@@ -12,7 +12,7 @@ class JsonImporterTest {
     @Test
     fun `fromExportFile converts options and tags correctly`() {
         val exportFile = ExportFile(
-            version = 1,
+            version = 2,
             exportedAt = "2026-04-06T12:00:00Z",
             predictions = listOf(
                 ExportedPrediction(
@@ -20,8 +20,8 @@ class JsonImporterTest {
                     createdAt = "2026-01-01T00:00:00Z",
                     tags = listOf("a", "b"),
                     options = listOf(
-                        ExportedOption("Yes", 70, 0),
-                        ExportedOption("No", 30, 1),
+                        ExportedOption("Yes", weight = 7, probability = 70, sortOrder = 0),
+                        ExportedOption("No", weight = 3, probability = 30, sortOrder = 1),
                     ),
                 )
             ),
@@ -34,13 +34,13 @@ class JsonImporterTest {
         assertNull(item.prediction.resolvedAt)
         assertEquals(2, item.options.size)
         assertEquals("Yes", item.options[0].label)
-        assertEquals(70, item.options[0].probability)
+        assertEquals(7, item.options[0].weight)
     }
 
     @Test
     fun `fromExportFile preserves resolved_at and outcome index`() {
         val exportFile = ExportFile(
-            version = 1,
+            version = 2,
             exportedAt = "2026-04-06T12:00:00Z",
             predictions = listOf(
                 ExportedPrediction(
@@ -49,7 +49,7 @@ class JsonImporterTest {
                     resolvedAt = "2026-03-01T00:00:00Z",
                     outcomeOptionIndex = 0,
                     tags = emptyList(),
-                    options = listOf(ExportedOption("Yes", 100, 0)),
+                    options = listOf(ExportedOption("Yes", weight = 10, probability = 100, sortOrder = 0)),
                 )
             ),
         )
@@ -62,14 +62,14 @@ class JsonImporterTest {
     @Test
     fun `fromExportFile resets IDs to 0 for new import`() {
         val exportFile = ExportFile(
-            version = 1,
+            version = 2,
             exportedAt = "2026-04-06T12:00:00Z",
             predictions = listOf(
                 ExportedPrediction(
                     id = 99L, question = "Q",
                     createdAt = "2026-01-01T00:00:00Z",
                     tags = emptyList(),
-                    options = listOf(ExportedOption("Yes", 100, 0)),
+                    options = listOf(ExportedOption("Yes", weight = 10, probability = 100, sortOrder = 0)),
                 )
             ),
         )

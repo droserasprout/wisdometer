@@ -2,6 +2,7 @@ package com.wisdometer.ui.theme
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 
 // Light palette
 val Background = Color(0xFFFAFAF8)
@@ -24,6 +25,15 @@ val BarColors = listOf(
     Color(0xFF9B7EC8),
     Color(0xFF4AC8C8),
 )
+
+/** Red (weight 1) → Yellow (weight 5) → Green (weight 10). */
+fun weightColor(weight: Int): Color {
+    val t = (weight - 1).coerceIn(0, 9) / 9f
+    val red = Color(0xFFD96A6A)
+    val amber = Color(0xFFE8A44A)
+    val green = Color(0xFF5CB85C)
+    return if (t < 0.5f) lerp(red, amber, t * 2f) else lerp(amber, green, (t - 0.5f) * 2f)
+}
 
 // Custom colors that aren't covered by Material3 colorScheme
 data class WisdometerColors(

@@ -14,7 +14,7 @@ import javax.inject.Inject
 data class OptionDraft(
     val id: Long = 0,
     val label: String = "",
-    val probability: Int = 0,
+    val weight: Int = 5,
     val sortOrder: Int = 0,
 )
 
@@ -24,7 +24,6 @@ data class EditUiState(
     val options: List<OptionDraft> = listOf(OptionDraft(sortOrder = 0), OptionDraft(sortOrder = 1)),
     val reminderAt: Instant? = null,
     val tagsInput: String = "",
-    val probabilitySum: Int = 0,
     val isSaving: Boolean = false,
     val isLoaded: Boolean = false,
     // preserved from original — never overwritten on edit
@@ -53,11 +52,10 @@ class EditPredictionViewModel @Inject constructor(
                         question = item.prediction.title,
                         description = item.prediction.description,
                         options = item.sortedOptions.mapIndexed { i, opt ->
-                            OptionDraft(opt.id, opt.label, opt.probability, i)
+                            OptionDraft(opt.id, opt.label, opt.weight, i)
                         },
                         reminderAt = item.prediction.reminderAt,
                         tagsInput = item.prediction.tags.replace(",", ", "),
-                        probabilitySum = item.options.sumOf { opt -> opt.probability },
                         isLoaded = true,
                         createdAt = item.prediction.createdAt,
                         resolvedAt = item.prediction.resolvedAt,
@@ -75,9 +73,8 @@ class EditPredictionViewModel @Inject constructor(
     fun setTagsInput(t: String) = _state.update { it.copy(tagsInput = t) }
 
     fun setOptionLabel(index: Int, label: String) = updateOption(index) { it.copy(label = label) }
-    fun setOptionProbability(index: Int, prob: Int) {
-        updateOption(index) { it.copy(probability = prob.coerceIn(0, 100)) }
-        recalcSum()
+    fun setOptionWeight(index: Int, weight: Int) {
+        updateOption(index) { it.copy(weight = weight.coerceIn(1, 10)) }
     }
 
     fun addOption() = _state.update { s ->
@@ -88,7 +85,7 @@ class EditPredictionViewModel @Inject constructor(
     fun removeOption(index: Int) = _state.update { s ->
         val newOptions = s.options.toMutableList().also { it.removeAt(index) }
             .mapIndexed { i, opt -> opt.copy(sortOrder = i) }
-        s.copy(options = newOptions, probabilitySum = newOptions.sumOf { it.probability })
+        s.copy(options = newOptions)
     }
 
     private fun updateOption(index: Int, transform: (OptionDraft) -> OptionDraft) =
@@ -98,13 +95,9 @@ class EditPredictionViewModel @Inject constructor(
             s.copy(options = newOptions)
         }
 
-    private fun recalcSum() = _state.update { s ->
-        s.copy(probabilitySum = s.options.sumOf { it.probability })
-    }
-
     fun save(onDone: () -> Unit) {
         val s = _state.value
-        if (s.question.isBlank() || s.probabilitySum != 100) return
+        if (s.question.isBlank()) return
         _state.update { it.copy(isSaving = true) }
         viewModelScope.launch {
             val tags = s.tagsInput.split(",").map { it.trim() }.filter { it.isNotBlank() }.joinToString(",")
@@ -123,7 +116,7 @@ class EditPredictionViewModel @Inject constructor(
                     id = draft.id,
                     predictionId = editingPredictionId ?: 0L,
                     label = draft.label,
-                    probability = draft.probability,
+                    weight = draft.weight,
                     sortOrder = i,
                 )
             }

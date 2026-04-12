@@ -3,7 +3,6 @@ package com.wisdometer.ui.edit
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -13,7 +12,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wisdometer.ui.theme.WisdometerTypography
@@ -43,7 +41,7 @@ fun EditPredictionScreen(
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
 
-    val canSave = state.question.isNotBlank() && state.probabilitySum == 100 &&
+    val canSave = state.question.isNotBlank() &&
         state.reminderAt != null && !state.isSaving
 
     Scaffold(
@@ -95,48 +93,51 @@ fun EditPredictionScreen(
             Text("Options", style = WisdometerTypography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
 
+            val weightTotal = state.options.sumOf { it.weight }.toDouble()
+
             state.options.forEachIndexed { index, option ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    OutlinedTextField(
-                        value = option.label,
-                        onValueChange = { viewModel.setOptionLabel(index, it) },
-                        label = { Text("Label") },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true,
-                    )
-                    OutlinedTextField(
-                        value = if (option.probability == 0) "" else option.probability.toString(),
-                        onValueChange = { v ->
-                            viewModel.setOptionProbability(index, v.toIntOrNull() ?: 0)
-                        },
-                        label = { Text("%") },
-                        modifier = Modifier.width(72.dp),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
-                    if (state.options.size > 2) {
-                        IconButton(onClick = { viewModel.removeOption(index) }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Remove option")
+                val pct = if (weightTotal > 0) Math.round(option.weight / weightTotal * 100).toInt() else 0
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        OutlinedTextField(
+                            value = option.label,
+                            onValueChange = { viewModel.setOptionLabel(index, it) },
+                            label = { Text("Label") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                        )
+                        if (state.options.size > 2) {
+                            IconButton(onClick = { viewModel.removeOption(index) }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Remove option")
+                            }
                         }
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Slider(
+                            value = option.weight.toFloat(),
+                            onValueChange = { viewModel.setOptionWeight(index, Math.round(it)) },
+                            valueRange = 1f..10f,
+                            steps = 8,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Text(
+                            "${option.weight}.0 ($pct%)",
+                            style = WisdometerTypography.bodySmall,
+                            modifier = Modifier.width(80.dp),
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            val sumColor = if (state.probabilitySum == 100)
-                MaterialTheme.colorScheme.primary
-            else
-                MaterialTheme.colorScheme.error
-            Text(
-                "Sum: ${state.probabilitySum}% (must equal 100%)",
-                style = WisdometerTypography.bodySmall,
-                color = sumColor,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
             TextButton(onClick = viewModel::addOption) {
                 Text("+ Add option")
             }

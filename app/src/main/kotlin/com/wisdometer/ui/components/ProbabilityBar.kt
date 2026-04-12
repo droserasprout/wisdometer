@@ -19,6 +19,7 @@ import com.wisdometer.ui.theme.WisdometerTypography
 fun ProbabilityBar(
     label: String,
     probability: Int,
+    weight: Int,
     barColor: Color,
     isActualOutcome: Boolean,
     isTopPrediction: Boolean,
@@ -49,7 +50,7 @@ fun ProbabilityBar(
                 color = if (isActualOutcome) barColor else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = "$probability%",
+                text = "${weight}.0",
                 style = textStyle,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

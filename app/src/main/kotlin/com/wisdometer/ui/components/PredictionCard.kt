@@ -35,7 +35,8 @@ fun PredictionCard(
     val optionSpacing = if (compact) 2.dp else 4.dp
     val wisdometerColors = LocalWisdometerColors.current
     val resolvedAlpha = if (item.isResolved) wisdometerColors.resolvedCardAlpha else 1f
-    val topOptionId = item.sortedOptions.maxByOrNull { it.probability }?.id
+    val pctMap = item.normalizedPercentages
+    val topOptionId = item.sortedOptions.maxByOrNull { it.weight }?.id
     val tags = item.prediction.tagList
     val reminder = item.prediction.reminderAt
 
@@ -78,8 +79,9 @@ fun PredictionCard(
             item.sortedOptions.forEachIndexed { index, option ->
                 ProbabilityBar(
                     label = option.label,
-                    probability = option.probability,
-                    barColor = BarColors[index % BarColors.size],
+                    probability = pctMap[option.id] ?: 0,
+                    weight = option.weight,
+                    barColor = weightColor(option.weight),
                     isActualOutcome = option.id == item.prediction.outcomeOptionId,
                     isTopPrediction = option.id == topOptionId,
                     compact = compact,

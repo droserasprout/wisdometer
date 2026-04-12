@@ -120,7 +120,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             Triple("Total", if (state.isLoaded) state.totalPredictions.toString() else "...", BarColors[0]),
             Triple("Resolved", if (state.isLoaded) state.resolvedPredictions.toString() else "...", BarColors[1]),
             Triple("Open", if (state.isLoaded) state.openPredictions.toString() else "...", BarColors[2]),
-            Triple("Avg Confidence", if (state.isLoaded) "${state.avgConfidence.roundToInt()}%" else "...", BarColors[3]),
+            Triple("Avg Confidence", if (state.isLoaded) "${"%.1f".format(state.avgConfidence)}" else "...", BarColors[3]),
         )
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             statTiles.chunked(2).forEach { rowTiles ->
@@ -215,7 +215,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Confidence distribution", style = WisdometerTypography.titleMedium)
                 Text(
-                    "How often your top option falls in each probability bucket",
+                    "How often your top option falls at each weight level",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

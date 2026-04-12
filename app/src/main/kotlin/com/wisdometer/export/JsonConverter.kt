@@ -33,8 +33,11 @@ class JsonConverter @Inject constructor() {
                 outcomeOptionIndex = outcomeIndex,
                 tags = if (item.prediction.tags.isBlank()) emptyList()
                        else item.prediction.tags.split(",").map { it.trim() }.filter { it.isNotBlank() },
-                options = item.sortedOptions.map { opt ->
-                    ExportedOption(opt.label, opt.probability, opt.sortOrder)
+                options = run {
+                    val pcts = item.normalizedPercentages
+                    item.sortedOptions.map { opt ->
+                        ExportedOption(opt.label, opt.weight, pcts[opt.id] ?: 0, opt.sortOrder)
+                    }
                 },
             )
         },
@@ -57,7 +60,7 @@ class JsonConverter @Inject constructor() {
                     id = 0,
                     predictionId = 0,
                     label = opt.label,
-                    probability = opt.probability,
+                    weight = opt.weight,
                     sortOrder = opt.sortOrder.takeIf { it >= 0 } ?: i,
                 )
             }

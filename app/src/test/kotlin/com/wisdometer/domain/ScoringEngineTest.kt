@@ -12,7 +12,7 @@ class ScoringEngineTest {
     private val engine = ScoringEngine()
 
     private fun makePrediction(
-        options: List<Pair<String, Int>>,  // label to probability
+        options: List<Pair<String, Int>>,  // label to weight (1-10)
         actualIndex: Int,
     ): PredictionWithOptions {
         val prediction = Prediction(
@@ -22,12 +22,12 @@ class ScoringEngineTest {
             resolvedAt = Instant.EPOCH,
             outcomeOptionId = (actualIndex + 1).toLong(),
         )
-        val predictionOptions = options.mapIndexed { i, (label, prob) ->
+        val predictionOptions = options.mapIndexed { i, (label, weight) ->
             PredictionOption(
                 id = (i + 1).toLong(),
                 predictionId = 1L,
                 label = label,
-                probability = prob,
+                weight = weight,
                 sortOrder = i,
             )
         }
@@ -35,41 +35,48 @@ class ScoringEngineTest {
     }
 
     @Test
-    fun `simpleCloseness is 1 when 100 percent on correct outcome`() {
-        val p = makePrediction(listOf("Yes" to 100), actualIndex = 0)
+    fun `simpleCloseness is 1 when all weight on correct outcome`() {
+        // Single option with weight 10 → 100% normalized
+        val p = makePrediction(listOf("Yes" to 10), actualIndex = 0)
         assertEquals(1.0, engine.simpleCloseness(listOf(p)), 0.001)
     }
 
     @Test
-    fun `simpleCloseness is 0_1 when 10 percent on correct outcome`() {
-        val p = makePrediction(listOf("Yes" to 10, "No" to 90), actualIndex = 0)
+    fun `simpleCloseness reflects weight ratio`() {
+        // weight 1 vs weight 9 → correct gets 10% normalized
+        val p = makePrediction(listOf("Yes" to 1, "No" to 9), actualIndex = 0)
         assertEquals(0.1, engine.simpleCloseness(listOf(p)), 0.001)
     }
 
     @Test
     fun `simpleCloseness averages across multiple predictions`() {
-        val p1 = makePrediction(listOf("Yes" to 100), actualIndex = 0)  // 1.0
-        val p2 = makePrediction(listOf("Yes" to 0, "No" to 100), actualIndex = 0)  // 0.0
-        assertEquals(0.5, engine.simpleCloseness(listOf(p1, p2)), 0.001)
+        val p1 = makePrediction(listOf("Yes" to 10), actualIndex = 0)  // 1.0
+        val p2 = makePrediction(listOf("Yes" to 1, "No" to 9), actualIndex = 0)  // 0.1
+        assertEquals(0.55, engine.simpleCloseness(listOf(p1, p2)), 0.001)
     }
 
     @Test
     fun `brierScore is 0 for perfect prediction`() {
-        val p = makePrediction(listOf("Yes" to 100), actualIndex = 0)
+        val p = makePrediction(listOf("Yes" to 10), actualIndex = 0)
         assertEquals(0.0, engine.brierScore(listOf(p)), 0.001)
     }
 
     @Test
-    fun `brierScore is 2 for worst prediction single option`() {
-        // 0% on correct, 100% on wrong: (0-1)^2 + (1-0)^2 = 1 + 1 = 2
-        val p = makePrediction(listOf("Yes" to 0, "No" to 100), actualIndex = 0)
-        assertEquals(2.0, engine.brierScore(listOf(p)), 0.001)
+    fun `brierScore is 2 for worst prediction`() {
+        // weight 1 on correct, weight 9 on wrong → 10% vs 90%
+        // NOT the worst — worst is 0% on correct
+        // With weights we can't get exactly 0%, but 1 vs 10000 would approach it
+        // Use weight 0... but min is 1. So worst achievable with 2 options:
+        // weight 1 vs weight 9: (0.1-1)^2 + (0.9)^2 = 0.81 + 0.81 = 1.62
+        val p = makePrediction(listOf("Yes" to 1, "No" to 9), actualIndex = 0)
+        assertEquals(1.62, engine.brierScore(listOf(p)), 0.001)
     }
 
     @Test
-    fun `brierScore is 0_5 for 50 percent on correct with two options`() {
-        // (0.5-1)^2 + (0.5-0)^2 = 0.25 + 0.25 = 0.5
-        val p = makePrediction(listOf("Yes" to 50, "No" to 50), actualIndex = 0)
+    fun `brierScore for equal weights with two options`() {
+        // equal weight → 50/50 normalized
+        // (0.5-1)^2 + (0.5)^2 = 0.25 + 0.25 = 0.5
+        val p = makePrediction(listOf("Yes" to 5, "No" to 5), actualIndex = 0)
         assertEquals(0.5, engine.brierScore(listOf(p)), 0.001)
     }
 
@@ -89,14 +96,14 @@ class ScoringEngineTest {
             outcomeOptionId = 1L, tags = "career")
         val p2 = Prediction(id = 2, title = "Q2", createdAt = Instant.EPOCH, resolvedAt = Instant.EPOCH,
             outcomeOptionId = 3L, tags = "finance")
-        val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Yes", probability = 100, sortOrder = 0)
-        val opt2 = PredictionOption(id = 3, predictionId = 2, label = "No", probability = 10, sortOrder = 0)
+        val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Yes", weight = 10, sortOrder = 0)
+        val opt2 = PredictionOption(id = 3, predictionId = 2, label = "No", weight = 1, sortOrder = 0)
         val items = listOf(
             PredictionWithOptions(p1, listOf(opt1)),
             PredictionWithOptions(p2, listOf(opt2)),
         )
         assertEquals(1.0, engine.simpleClosenessForTag(items, "career"), 0.001)
-        assertEquals(0.1, engine.simpleClosenessForTag(items, "finance"), 0.001)
+        assertEquals(1.0, engine.simpleClosenessForTag(items, "finance"), 0.001)  // single option = 100%
     }
 
     @Test
@@ -105,11 +112,11 @@ class ScoringEngineTest {
             outcomeOptionId = 1L, tags = "career")
         val p2 = Prediction(id = 2, title = "Q2", createdAt = Instant.EPOCH, resolvedAt = Instant.EPOCH,
             outcomeOptionId = 3L, tags = "finance")
-        // p1: 100% on correct → (1-1)^2 + 0 = 0.0
-        val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Yes", probability = 100, sortOrder = 0)
-        // p2: 50% on correct, 50% other → (0.5-1)^2 + 0.5^2 = 0.25 + 0.25 = 0.5
-        val opt2 = PredictionOption(id = 3, predictionId = 2, label = "No", probability = 50, sortOrder = 0)
-        val opt3 = PredictionOption(id = 4, predictionId = 2, label = "Yes", probability = 50, sortOrder = 1)
+        // p1: single option weight 10 → 100% on correct → brier 0.0
+        val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Yes", weight = 10, sortOrder = 0)
+        // p2: equal weights → 50/50 → (0.5-1)^2 + 0.5^2 = 0.25 + 0.25 = 0.5
+        val opt2 = PredictionOption(id = 3, predictionId = 2, label = "No", weight = 5, sortOrder = 0)
+        val opt3 = PredictionOption(id = 4, predictionId = 2, label = "Yes", weight = 5, sortOrder = 1)
         val items = listOf(
             PredictionWithOptions(p1, listOf(opt1)),
             PredictionWithOptions(p2, listOf(opt2, opt3)),
@@ -119,20 +126,20 @@ class ScoringEngineTest {
     }
 
     @Test
-    fun `avgConfidence is mean probability of top-ranked option`() {
+    fun `avgConfidence is mean weight of top-ranked option`() {
         val p1 = Prediction(id = 1, title = "Q", createdAt = Instant.EPOCH)
         val p2 = Prediction(id = 2, title = "Q2", createdAt = Instant.EPOCH)
         val opts1 = listOf(
-            PredictionOption(id = 1, predictionId = 1, label = "Yes", probability = 80, sortOrder = 0),
-            PredictionOption(id = 2, predictionId = 1, label = "No", probability = 20, sortOrder = 1),
+            PredictionOption(id = 1, predictionId = 1, label = "Yes", weight = 8, sortOrder = 0),
+            PredictionOption(id = 2, predictionId = 1, label = "No", weight = 2, sortOrder = 1),
         )
         val opts2 = listOf(
-            PredictionOption(id = 3, predictionId = 2, label = "A", probability = 60, sortOrder = 0),
-            PredictionOption(id = 4, predictionId = 2, label = "B", probability = 40, sortOrder = 1),
+            PredictionOption(id = 3, predictionId = 2, label = "A", weight = 6, sortOrder = 0),
+            PredictionOption(id = 4, predictionId = 2, label = "B", weight = 4, sortOrder = 1),
         )
         val items = listOf(PredictionWithOptions(p1, opts1), PredictionWithOptions(p2, opts2))
-        // top ranked: 80 and 60, avg = 70
-        assertEquals(70.0, engine.avgConfidence(items), 0.001)
+        // top weights: 8 and 6, avg = 7.0
+        assertEquals(7.0, engine.avgConfidence(items), 0.001)
     }
 
     @Test
@@ -141,9 +148,15 @@ class ScoringEngineTest {
             resolvedAt = Instant.ofEpochMilli(1000), outcomeOptionId = 1)
         val p2 = Prediction(id = 2, title = "Q2", createdAt = Instant.EPOCH,
             resolvedAt = Instant.ofEpochMilli(2000), outcomeOptionId = 3)
-        val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Y", probability = 100, sortOrder = 0)
-        val opt2 = PredictionOption(id = 3, predictionId = 2, label = "N", probability = 50, sortOrder = 0)
-        val items = listOf(PredictionWithOptions(p1, listOf(opt1)), PredictionWithOptions(p2, listOf(opt2)))
+        // single option → 100%
+        val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Y", weight = 10, sortOrder = 0)
+        // equal weights → 50%
+        val opt2 = PredictionOption(id = 3, predictionId = 2, label = "N", weight = 5, sortOrder = 0)
+        val opt3 = PredictionOption(id = 4, predictionId = 2, label = "Y", weight = 5, sortOrder = 1)
+        val items = listOf(
+            PredictionWithOptions(p1, listOf(opt1)),
+            PredictionWithOptions(p2, listOf(opt2, opt3)),
+        )
         val points = engine.accuracyOverTime(items)
         // point 0: resolvedAt=1000, cumulative = 1.0
         // point 1: resolvedAt=2000, cumulative = (1.0 + 0.5) / 2 = 0.75
@@ -158,9 +171,13 @@ class ScoringEngineTest {
             resolvedAt = Instant.ofEpochMilli(1000), outcomeOptionId = 1)
         val p2 = Prediction(id = 2, title = "Q2", createdAt = Instant.EPOCH,
             resolvedAt = Instant.ofEpochMilli(2000), outcomeOptionId = 3)
-        val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Y", probability = 100, sortOrder = 0)
-        val opt2 = PredictionOption(id = 3, predictionId = 2, label = "N", probability = 50, sortOrder = 0)
-        val items = listOf(PredictionWithOptions(p1, listOf(opt1)), PredictionWithOptions(p2, listOf(opt2)))
+        val opt1 = PredictionOption(id = 1, predictionId = 1, label = "Y", weight = 10, sortOrder = 0)
+        val opt2 = PredictionOption(id = 3, predictionId = 2, label = "N", weight = 5, sortOrder = 0)
+        val opt3 = PredictionOption(id = 4, predictionId = 2, label = "Y", weight = 5, sortOrder = 1)
+        val items = listOf(
+            PredictionWithOptions(p1, listOf(opt1)),
+            PredictionWithOptions(p2, listOf(opt2, opt3)),
+        )
         val points = engine.accuracyOverCount(items)
         assertEquals(2, points.size)
         assertEquals(1, points[0].first)

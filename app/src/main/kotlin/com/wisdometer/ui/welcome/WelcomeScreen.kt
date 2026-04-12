@@ -39,7 +39,7 @@ fun WelcomeScreen(onGetStarted: () -> Unit) {
 
             ConceptItem(
                 title = "Make predictions",
-                body = "Ask a question, add possible outcomes, and assign a probability to each. They must add up to 100%.",
+                body = "Ask a question, add possible outcomes, and rate how likely each is on a scale of 1 to 10.",
             )
             Spacer(modifier = Modifier.height(20.dp))
             ConceptItem(

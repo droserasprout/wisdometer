@@ -76,10 +76,8 @@ fun ConfidenceChart(
                 cornerRadius = CornerRadius(4f, 4f),
             )
 
-            // X label (bucket range)
-            val lo = midpoint - 5
-            val hi = midpoint + 4
-            val xLabel = "$lo–$hi"
+            // X label (weight value)
+            val xLabel = "$midpoint"
             val m = textMeasurer.measure(xLabel, labelStyle)
             drawText(m, topLeft = Offset(x + barW / 2f - m.size.width / 2f, top + ch + 6f))
 

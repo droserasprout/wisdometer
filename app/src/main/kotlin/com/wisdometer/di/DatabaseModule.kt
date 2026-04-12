@@ -19,6 +19,7 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): WisdometerDatabase =
         Room.databaseBuilder(context, WisdometerDatabase::class.java, "wisdometer.db")
+            .addMigrations(WisdometerDatabase.MIGRATION_1_2)
             .fallbackToDestructiveMigration()
             .build()
 
