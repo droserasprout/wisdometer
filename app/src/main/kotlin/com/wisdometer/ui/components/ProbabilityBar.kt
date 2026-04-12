@@ -14,6 +14,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.wisdometer.ui.theme.WisdometerTypography
+import com.wisdometer.ui.theme.weightColor
 
 @Composable
 fun ProbabilityBar(
@@ -28,6 +29,7 @@ fun ProbabilityBar(
 ) {
     val barHeight: Dp = if (compact) 6.dp else 10.dp
     val verticalPadding: Dp = if (compact) 2.dp else 4.dp
+    val gap: Dp = if (compact) 2.dp else 3.dp
 
     val prefix = when {
         isActualOutcome && isTopPrediction -> "🎯🔮 "
@@ -56,20 +58,20 @@ fun ProbabilityBar(
             )
         }
         Spacer(modifier = Modifier.height(2.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(barHeight)
-                .clip(RoundedCornerShape(50))
-                .background(barColor.copy(alpha = 0.15f)),
+        Row(
+            modifier = Modifier.fillMaxWidth().height(barHeight),
+            horizontalArrangement = Arrangement.spacedBy(gap),
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(fraction = probability / 100f)
-                    .clip(RoundedCornerShape(50))
-                    .background(barColor),
-            )
+            for (i in 1..10) {
+                val segmentColor = if (i <= weight) weightColor(i) else weightColor(i).copy(alpha = 0.15f)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(segmentColor),
+                )
+            }
         }
     }
 }
