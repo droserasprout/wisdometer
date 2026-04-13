@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -97,17 +100,19 @@ fun PredictionCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (tags.isNotEmpty()) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
                             Icon(
                                 Icons.AutoMirrored.Filled.Label,
                                 contentDescription = null,
-                                modifier = Modifier.size(11.dp),
+                                modifier = Modifier.size(14.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            Spacer(modifier = Modifier.width(3.dp))
                             Text(
                                 text = tags.joinToString(" · "),
-                                style = MaterialTheme.typography.labelSmall,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -115,11 +120,22 @@ fun PredictionCard(
                         Spacer(modifier = Modifier.weight(1f))
                     }
                     if (reminder != null) {
-                        Text(
-                            text = "⏰ ${dateFmt.format(reminder)}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            Icon(
+                                Icons.Outlined.Schedule,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = dateFmt.format(reminder),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
             }
@@ -131,17 +147,39 @@ fun PredictionCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text(
-                        text = "📅 ${dateFmtShort.format(item.prediction.createdAt)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    item.prediction.updatedAt?.let { updatedAt ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Icon(
+                            Icons.Outlined.CalendarMonth,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                         Text(
-                            text = "✏️ ${dateFmtShort.format(updatedAt)}",
-                            style = MaterialTheme.typography.labelSmall,
+                            text = dateFmtShort.format(item.prediction.createdAt),
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                    }
+                    item.prediction.updatedAt?.let { updatedAt ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            Icon(
+                                Icons.Outlined.Edit,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = dateFmtShort.format(updatedAt),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
             }

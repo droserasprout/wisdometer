@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -90,17 +92,39 @@ fun PredictionDetailScreen(
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        "📅 ${dateFmt.format(pw.prediction.createdAt)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    pw.prediction.updatedAt?.let {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Icon(
+                            Icons.Outlined.CalendarMonth,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                         Text(
-                            "✏️ ${dateFmt.format(it)}",
-                            style = MaterialTheme.typography.labelSmall,
+                            dateFmt.format(pw.prediction.createdAt),
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                    }
+                    pw.prediction.updatedAt?.let {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            Icon(
+                                Icons.Outlined.Edit,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                dateFmt.format(it),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(12.dp))

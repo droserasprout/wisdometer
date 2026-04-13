@@ -3,6 +3,10 @@ package com.wisdometer.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,14 +35,8 @@ fun ProbabilityBar(
     val verticalPadding: Dp = if (compact) 2.dp else 4.dp
     val gap: Dp = if (compact) 2.dp else 3.dp
 
-    val prefix = when {
-        isActualOutcome && isTopPrediction -> "🎯🔮 "
-        isActualOutcome -> "🎯 "
-        isTopPrediction -> "🔮 "
-        else -> ""
-    }
-
     val textStyle: TextStyle = if (compact) WisdometerTypography.labelSmall else WisdometerTypography.bodyLarge
+    val iconSize: Dp = if (compact) 12.dp else 16.dp
 
     Column(modifier = modifier.padding(vertical = verticalPadding)) {
         Row(
@@ -46,11 +44,32 @@ fun ProbabilityBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = "$prefix$label",
-                style = textStyle,
-                color = if (isActualOutcome) barColor else MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (isActualOutcome) {
+                    Icon(
+                        Icons.Outlined.CheckCircle,
+                        contentDescription = "actual outcome",
+                        modifier = Modifier.size(iconSize),
+                        tint = barColor,
+                    )
+                }
+                if (isTopPrediction) {
+                    Icon(
+                        Icons.Outlined.Star,
+                        contentDescription = "top prediction",
+                        modifier = Modifier.size(iconSize),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Text(
+                    text = label,
+                    style = textStyle,
+                    color = if (isActualOutcome) barColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Text(
                 text = "${weight}.0",
                 style = textStyle,

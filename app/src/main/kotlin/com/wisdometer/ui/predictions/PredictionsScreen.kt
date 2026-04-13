@@ -67,7 +67,7 @@ fun PredictionsScreen(
             Spacer(modifier = Modifier.height(8.dp))
             LazyColumn(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(state.items, key = { it.prediction.id }) { item ->
                     PredictionCard(

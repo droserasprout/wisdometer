@@ -40,7 +40,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             .padding(16.dp),
     ) {
         Text("Profile", style = WisdometerTypography.headlineLarge)
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Accuracy card with donut ring
         Card(
@@ -71,7 +71,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                     ) {
                         Text(
                             if (state.isLoaded) "Brier: ${"%.2f".format(state.brierScore)}" else "Brier: ...",
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         var showTooltip by remember { mutableStateOf(false) }
@@ -106,14 +106,14 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                         if (state.isLoaded)
                             "${state.resolvedPredictions} resolved · ${state.openPredictions} open"
                         else "... resolved · ... open",
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // 2×2 stat tiles
         val statTiles = listOf(
@@ -137,7 +137,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Accuracy chart card with toggle
         Card(
@@ -182,7 +182,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         }
 
         // Calibration chart
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -193,7 +193,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                 Text("Calibration", style = WisdometerTypography.titleMedium)
                 Text(
                     "Predicted % vs actual hit rate · dashed = perfect",
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -205,7 +205,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         }
 
         // Confidence distribution
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -216,7 +216,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                 Text("Confidence distribution", style = WisdometerTypography.titleMedium)
                 Text(
                     "How many options you've assigned each weight (bars) and how many turned out correct (ticks)",
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -229,7 +229,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
 
         // Tag accuracy breakdown
         if (state.tagAccuracies.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -249,7 +249,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                             Text(ta.tag, style = WisdometerTypography.bodyMedium)
                             Text(
                                 "${(ta.closeness * 100).roundToInt()}%",
-                                style = MaterialTheme.typography.labelSmall,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -282,7 +282,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             )
             Text("Share Stats")
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
 
@@ -319,7 +319,7 @@ private fun StatTile(
                 )
                 Text(
                     label,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

@@ -81,6 +81,7 @@ fun EditPredictionScreen(
                 label = { Text("Title") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                shape = RoundedCornerShape(8.dp),
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
@@ -89,6 +90,7 @@ fun EditPredictionScreen(
                 label = { Text("Description (optional)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
+                shape = RoundedCornerShape(8.dp),
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -108,6 +110,7 @@ fun EditPredictionScreen(
                             label = { Text("Label") },
                             modifier = Modifier.weight(1f),
                             singleLine = true,
+                            shape = RoundedCornerShape(8.dp),
                         )
                         if (state.options.size > 2) {
                             IconButton(onClick = { viewModel.removeOption(index) }) {
@@ -147,6 +150,7 @@ fun EditPredictionScreen(
                 label = { Text("Tags (comma-separated)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                shape = RoundedCornerShape(8.dp),
             )
 
             Spacer(modifier = Modifier.height(16.dp))
