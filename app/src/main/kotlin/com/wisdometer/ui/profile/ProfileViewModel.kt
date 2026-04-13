@@ -19,7 +19,9 @@ data class ProfileUiState(
     val totalPredictions: Int = 0,
     val resolvedPredictions: Int = 0,
     val openPredictions: Int = 0,
+    val wonPredictions: Int = 0,
     val avgConfidence: Double = 0.0,
+    val avgConfidenceOpen: Double = 0.0,
     val simpleCloseness: Double = 0.0,
     val brierScore: Double = 0.0,
     val tagAccuracies: List<TagAccuracy> = emptyList(),
@@ -38,6 +40,7 @@ class ProfileViewModel @Inject constructor(
     val uiState: StateFlow<ProfileUiState> = repository.getAllPredictions()
         .map { all ->
             val resolved = all.filter { it.isResolved }
+            val open = all.filter { !it.isResolved }
             val tags = all.flatMap { it.prediction.tagList }.distinct()
             val tagAccuracies = tags.map { tag ->
                 TagAccuracy(
@@ -50,8 +53,10 @@ class ProfileViewModel @Inject constructor(
                 isLoaded = true,
                 totalPredictions = all.size,
                 resolvedPredictions = resolved.size,
-                openPredictions = all.size - resolved.size,
+                openPredictions = open.size,
+                wonPredictions = engine.wonCount(resolved),
                 avgConfidence = engine.avgConfidence(all),
+                avgConfidenceOpen = engine.avgConfidence(open),
                 simpleCloseness = engine.simpleCloseness(resolved),
                 brierScore = engine.brierScore(resolved),
                 tagAccuracies = tagAccuracies,

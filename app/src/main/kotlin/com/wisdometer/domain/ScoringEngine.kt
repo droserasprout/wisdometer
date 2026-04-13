@@ -68,6 +68,19 @@ class ScoringEngine @Inject constructor() {
         }.average()
     }
 
+    /**
+     * Count of resolved predictions where there is a single option with the highest weight
+     * (no ties at the top) and that option matches the recorded outcome.
+     */
+    fun wonCount(resolved: List<PredictionWithOptions>): Int {
+        return resolved.count { item ->
+            val outcomeId = item.prediction.outcomeOptionId ?: return@count false
+            val maxWeight = item.options.maxOfOrNull { it.weight } ?: return@count false
+            val tops = item.options.filter { it.weight == maxWeight }
+            tops.size == 1 && tops.single().id == outcomeId
+        }
+    }
+
     /** Returns list of (resolvedAtEpochMs, cumulativeAccuracy) sorted by resolution time. */
     fun accuracyOverTime(resolved: List<PredictionWithOptions>): List<Pair<Long, Double>> {
         val sorted = resolved

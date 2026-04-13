@@ -1,6 +1,5 @@
 package com.wisdometer.ui.profile
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
@@ -11,15 +10,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wisdometer.share.ShareImageRenderer
-import com.wisdometer.ui.theme.BarColors
 import com.wisdometer.ui.theme.WisdometerTypography
 import java.time.Instant
 import java.time.ZoneId
@@ -40,9 +33,36 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             .padding(16.dp),
     ) {
         Text("Profile", style = WisdometerTypography.headlineLarge)
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Accuracy card with donut ring
+        SectionHeader("Events")
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            CompactStatTile(
+                label = "Total",
+                value = if (state.isLoaded) state.totalPredictions.toString() else "...",
+                modifier = Modifier.weight(1f),
+            )
+            CompactStatTile(
+                label = "Open",
+                value = if (state.isLoaded) state.openPredictions.toString() else "...",
+                modifier = Modifier.weight(1f),
+            )
+            CompactStatTile(
+                label = "Resolved",
+                value = if (state.isLoaded) state.resolvedPredictions.toString() else "...",
+                modifier = Modifier.weight(1f),
+            )
+            CompactStatTile(
+                label = "Won",
+                value = if (state.isLoaded) state.wonPredictions.toString() else "...",
+                modifier = Modifier.weight(1f),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+        SectionHeader("Accuracy")
+        Spacer(modifier = Modifier.height(8.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -50,96 +70,61 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
             Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                AccuracyDonut(
+                SpeedometerGauge(
                     fraction = state.simpleCloseness.toFloat(),
-                    modifier = Modifier.size(72.dp),
+                    valueText = if (state.isLoaded) "${(state.simpleCloseness * 100).roundToInt()}%" else "...",
+                    label = "Accuracy",
+                    modifier = Modifier.weight(1f),
                 )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
-                    Text(
-                        if (state.isLoaded) "${(state.simpleCloseness * 100).roundToInt()}% Accuracy"
-                        else "... Accuracy",
-                        style = WisdometerTypography.headlineLarge,
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Text(
-                            if (state.isLoaded) "Brier: ${"%.2f".format(state.brierScore)}" else "Brier: ...",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        var showTooltip by remember { mutableStateOf(false) }
-                        Box(
-                            modifier = Modifier
-                                .wrapContentSize()
-                                .padding(0.dp),
-                        ) {
-                            TextButton(
-                                onClick = { showTooltip = !showTooltip },
-                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
-                            ) {
-                                Text(
-                                    "?",
-                                    style = MaterialTheme.typography.labelSmall,
-                                )
-                            }
-                            if (showTooltip) {
-                                AlertDialog(
-                                    onDismissRequest = { showTooltip = false },
-                                    title = { Text("Brier Score") },
-                                    text = { Text("Measures calibration — 0.0 is perfect, 2.0 is worst.") },
-                                    confirmButton = {
-                                        TextButton(onClick = { showTooltip = false }) { Text("OK") }
-                                    },
-                                )
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        if (state.isLoaded)
-                            "${state.resolvedPredictions} resolved · ${state.openPredictions} open"
-                        else "... resolved · ... open",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                SpeedometerGauge(
+                    fraction = (state.brierScore / 2.0).toFloat(),
+                    valueText = if (state.isLoaded) "%.2f".format(state.brierScore) else "...",
+                    label = "Brier",
+                    invert = true,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // 2×2 stat tiles
-        val statTiles = listOf(
-            Triple("Total", if (state.isLoaded) state.totalPredictions.toString() else "...", BarColors[0]),
-            Triple("Resolved", if (state.isLoaded) state.resolvedPredictions.toString() else "...", BarColors[1]),
-            Triple("Open", if (state.isLoaded) state.openPredictions.toString() else "...", BarColors[2]),
-            Triple("Avg Confidence", if (state.isLoaded) "${"%.1f".format(state.avgConfidence)}" else "...", BarColors[3]),
-        )
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            statTiles.chunked(2).forEach { rowTiles ->
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    rowTiles.forEach { (label, value, accentColor) ->
-                        StatTile(
-                            label = label,
-                            value = value,
-                            accentColor = accentColor,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
+        Spacer(modifier = Modifier.height(20.dp))
+        SectionHeader("Confidence")
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    ConfidenceStat(
+                        label = "All",
+                        value = if (state.isLoaded) "${(state.avgConfidence * 10).roundToInt()}%" else "...",
+                        modifier = Modifier.weight(1f),
+                    )
+                    ConfidenceStat(
+                        label = "Open only",
+                        value = if (state.isLoaded) "${(state.avgConfidenceOpen * 10).roundToInt()}%" else "...",
+                        modifier = Modifier.weight(1f),
+                    )
                 }
+                Spacer(modifier = Modifier.height(16.dp))
+                ConfidenceChart(
+                    distribution = state.confidenceDistribution,
+                    modifier = Modifier.fillMaxWidth().height(180.dp),
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
+        SectionHeader("Other")
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // Accuracy chart card with toggle
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -181,7 +166,6 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             }
         }
 
-        // Calibration chart
         Spacer(modifier = Modifier.height(12.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -204,30 +188,6 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             }
         }
 
-        // Confidence distribution
-        Spacer(modifier = Modifier.height(12.dp))
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Confidence distribution", style = WisdometerTypography.titleMedium)
-                Text(
-                    "How many options you've assigned each weight (bars) and how many turned out correct (ticks)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                ConfidenceChart(
-                    distribution = state.confidenceDistribution,
-                    modifier = Modifier.fillMaxWidth().height(180.dp),
-                )
-            }
-        }
-
-        // Tag accuracy breakdown
         if (state.tagAccuracies.isNotEmpty()) {
             Spacer(modifier = Modifier.height(12.dp))
             Card(
@@ -258,7 +218,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         val ctx = androidx.compose.ui.platform.LocalContext.current
         OutlinedButton(
             shape = RoundedCornerShape(8.dp),
@@ -287,10 +247,18 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
 }
 
 @Composable
-private fun StatTile(
+private fun SectionHeader(title: String) {
+    Text(
+        title.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun CompactStatTile(
     label: String,
     value: String,
-    accentColor: Color,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -299,65 +267,45 @@ private fun StatTile(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
-        Column {
-            // Colored top border
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(3.dp)
-                    .then(Modifier.wrapContentSize(Alignment.TopStart)),
-            ) {
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    drawRect(color = accentColor)
-                }
-            }
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text(
-                    value,
-                    style = WisdometerTypography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp, horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                value,
+                style = WisdometerTypography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
 
 @Composable
-private fun AccuracyDonut(
-    fraction: Float,
+private fun ConfidenceStat(
+    label: String,
+    value: String,
     modifier: Modifier = Modifier,
 ) {
-    val trackColor = MaterialTheme.colorScheme.surfaceVariant
-    val fillColor = BarColors[0]
-    Canvas(modifier = modifier) {
-        val strokeWidth = size.minDimension * 0.15f
-        val inset = strokeWidth / 2f
-        val arcSize = Size(size.width - strokeWidth, size.height - strokeWidth)
-        val topLeft = Offset(inset, inset)
-        // Track
-        drawArc(
-            color = trackColor,
-            startAngle = -90f,
-            sweepAngle = 360f,
-            useCenter = false,
-            topLeft = topLeft,
-            size = arcSize,
-            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            value,
+            style = WisdometerTypography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
         )
-        // Fill
-        drawArc(
-            color = fillColor,
-            startAngle = -90f,
-            sweepAngle = 360f * fraction.coerceIn(0f, 1f),
-            useCenter = false,
-            topLeft = topLeft,
-            size = arcSize,
-            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
