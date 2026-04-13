@@ -12,6 +12,17 @@ data class CalibrationPoint(
     val count: Int,
 )
 
+/**
+ * One weight-bucket in the confidence distribution.
+ * - `total`: count of every PredictionOption assigned this weight across all predictions.
+ * - `actual`: how many of those were the actual outcome (only defined for resolved predictions).
+ */
+data class ConfidenceBucket(
+    val weight: Int,   // 1..10
+    val total: Int,
+    val actual: Int,
+)
+
 @Singleton
 class ScoringEngine @Inject constructor() {
 
@@ -96,16 +107,22 @@ class ScoringEngine @Inject constructor() {
     }
 
     /**
-     * For each weight level (1–10), how many predictions had their TOP option at that weight?
-     * Returns list of (weight, count).
+     * For each weight level (1–10): total options assigned that weight across all predictions,
+     * and how many of those were the actual outcome (resolved predictions only).
+     * Returns a list of size 10 ordered by ascending weight.
      */
-    fun confidenceDistribution(all: List<PredictionWithOptions>): List<Pair<Int, Int>> {
-        val counts = IntArray(10) // index 0 = weight 1, index 9 = weight 10
+    fun confidenceDistribution(all: List<PredictionWithOptions>): List<ConfidenceBucket> {
+        val total = IntArray(10)
+        val actual = IntArray(10)
         for (item in all) {
-            val topWeight = item.options.maxOfOrNull { it.weight } ?: continue
-            counts[(topWeight - 1).coerceIn(0, 9)]++
+            val outcomeId = item.prediction.outcomeOptionId
+            for (option in item.options) {
+                val idx = (option.weight - 1).coerceIn(0, 9)
+                total[idx]++
+                if (outcomeId != null && option.id == outcomeId) actual[idx]++
+            }
         }
-        return counts.mapIndexed { i, n -> (i + 1) to n }
+        return (0 until 10).map { i -> ConfidenceBucket(weight = i + 1, total = total[i], actual = actual[i]) }
     }
 
     private fun cumulativeAccuracy(sortedResolved: List<PredictionWithOptions>): List<Double> {

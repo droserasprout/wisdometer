@@ -215,7 +215,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Confidence distribution", style = WisdometerTypography.titleMedium)
                 Text(
-                    "How often your top option falls at each weight level",
+                    "How many options you've assigned each weight (bars) and how many turned out correct (ticks)",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

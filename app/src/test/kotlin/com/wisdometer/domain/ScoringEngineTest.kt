@@ -166,6 +166,61 @@ class ScoringEngineTest {
     }
 
     @Test
+    fun `confidenceDistribution totals every option by weight and counts actuals from resolved`() {
+        // p1 (resolved, actual = id 1 at weight 8): options weight 8, 2
+        val p1 = Prediction(id = 1, title = "Q1", createdAt = Instant.EPOCH,
+            resolvedAt = Instant.EPOCH, outcomeOptionId = 1L)
+        val p1opts = listOf(
+            PredictionOption(id = 1, predictionId = 1, label = "A", weight = 8, sortOrder = 0),
+            PredictionOption(id = 2, predictionId = 1, label = "B", weight = 2, sortOrder = 1),
+        )
+        // p2 (resolved, actual = id 4 at weight 5): options weight 5, 5, 8
+        val p2 = Prediction(id = 2, title = "Q2", createdAt = Instant.EPOCH,
+            resolvedAt = Instant.EPOCH, outcomeOptionId = 4L)
+        val p2opts = listOf(
+            PredictionOption(id = 3, predictionId = 2, label = "A", weight = 5, sortOrder = 0),
+            PredictionOption(id = 4, predictionId = 2, label = "B", weight = 5, sortOrder = 1),
+            PredictionOption(id = 5, predictionId = 2, label = "C", weight = 8, sortOrder = 2),
+        )
+        // p3 (open, no outcome): options weight 2, 10
+        val p3 = Prediction(id = 3, title = "Q3", createdAt = Instant.EPOCH)
+        val p3opts = listOf(
+            PredictionOption(id = 6, predictionId = 3, label = "A", weight = 2, sortOrder = 0),
+            PredictionOption(id = 7, predictionId = 3, label = "B", weight = 10, sortOrder = 1),
+        )
+        val items = listOf(
+            PredictionWithOptions(p1, p1opts),
+            PredictionWithOptions(p2, p2opts),
+            PredictionWithOptions(p3, p3opts),
+        )
+
+        val dist = engine.confidenceDistribution(items)
+
+        assertEquals(10, dist.size)
+        // weights 1..10 in order
+        assertEquals((1..10).toList(), dist.map { it.weight })
+        // totals: weight 2 -> 2 (p1.B, p3.A); weight 5 -> 2 (p2.A, p2.B); weight 8 -> 2 (p1.A, p2.C); weight 10 -> 1 (p3.B)
+        assertEquals(2, dist[1].total)   // weight 2
+        assertEquals(2, dist[4].total)   // weight 5
+        assertEquals(2, dist[7].total)   // weight 8
+        assertEquals(1, dist[9].total)   // weight 10
+        assertEquals(0, dist[0].total)   // weight 1 untouched
+        // actuals: weight 5 -> 1 (p2.B id=4); weight 8 -> 1 (p1.A id=1); others 0 incl open
+        assertEquals(1, dist[4].actual)  // weight 5
+        assertEquals(1, dist[7].actual)  // weight 8
+        assertEquals(0, dist[1].actual)  // weight 2 — no outcome here
+        assertEquals(0, dist[9].actual)  // weight 10 — p3 is open
+    }
+
+    @Test
+    fun `confidenceDistribution returns all-zero buckets for empty input`() {
+        val dist = engine.confidenceDistribution(emptyList())
+        assertEquals(10, dist.size)
+        assertEquals(0, dist.sumOf { it.total })
+        assertEquals(0, dist.sumOf { it.actual })
+    }
+
+    @Test
     fun `accuracyOverCount returns cumulative rolling average by prediction count`() {
         val p1 = Prediction(id = 1, title = "Q1", createdAt = Instant.EPOCH,
             resolvedAt = Instant.ofEpochMilli(1000), outcomeOptionId = 1)
