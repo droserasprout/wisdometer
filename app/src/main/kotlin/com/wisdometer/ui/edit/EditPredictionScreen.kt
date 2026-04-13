@@ -12,8 +12,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.wisdometer.ui.components.WeightInputBar
 import com.wisdometer.ui.theme.WisdometerTypography
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -93,10 +95,7 @@ fun EditPredictionScreen(
             Text("Options", style = WisdometerTypography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
 
-            val weightTotal = state.options.sumOf { it.weight }.toDouble()
-
             state.options.forEachIndexed { index, option ->
-                val pct = if (weightTotal > 0) Math.round(option.weight / weightTotal * 100).toInt() else 0
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -121,17 +120,16 @@ fun EditPredictionScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Slider(
-                            value = option.weight.toFloat(),
-                            onValueChange = { viewModel.setOptionWeight(index, Math.round(it)) },
-                            valueRange = 1f..10f,
-                            steps = 8,
+                        WeightInputBar(
+                            weight = option.weight,
+                            onWeightChange = { viewModel.setOptionWeight(index, it) },
                             modifier = Modifier.weight(1f),
                         )
                         Text(
-                            "${option.weight}.0 ($pct%)",
+                            "${option.weight}",
                             style = WisdometerTypography.bodySmall,
-                            modifier = Modifier.width(80.dp),
+                            modifier = Modifier.width(24.dp),
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }
