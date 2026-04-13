@@ -23,9 +23,6 @@ fun PredictionsScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    // Refresh compact mode whenever this screen becomes active
-    LaunchedEffect(Unit) { viewModel.refreshCompact() }
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -72,7 +69,6 @@ fun PredictionsScreen(
                 items(state.items, key = { it.prediction.id }) { item ->
                     PredictionCard(
                         item = item,
-                        compact = state.compact,
                         onClick = { onNavigateToDetail(item.prediction.id) },
                     )
                 }

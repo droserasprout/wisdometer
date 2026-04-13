@@ -18,11 +18,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private const val PREFS_NAME = "wisdometer_settings"
-private const val KEY_COMPACT = "compact_mode"
 private const val KEY_NOTIFICATIONS = "notifications_enabled"
 
 data class SettingsUiState(
-    val compact: Boolean = false,
     val notificationsEnabled: Boolean = true,
     val statusMessage: String? = null,
 )
@@ -39,16 +37,10 @@ class SettingsViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         SettingsUiState(
-            compact = prefs.getBoolean(KEY_COMPACT, false),
             notificationsEnabled = prefs.getBoolean(KEY_NOTIFICATIONS, true),
         )
     )
     val state: StateFlow<SettingsUiState> = _state.asStateFlow()
-
-    fun setCompact(value: Boolean) {
-        prefs.edit().putBoolean(KEY_COMPACT, value).apply()
-        _state.update { it.copy(compact = value) }
-    }
 
     fun setNotificationsEnabled(value: Boolean) {
         prefs.edit().putBoolean(KEY_NOTIFICATIONS, value).apply()

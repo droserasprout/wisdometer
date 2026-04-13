@@ -35,18 +35,6 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         Text("Settings", style = WisdometerTypography.headlineLarge)
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Compact mode toggle
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text("Compact mode", style = WisdometerTypography.bodyMedium)
-            Switch(checked = state.compact, onCheckedChange = viewModel::setCompact)
-        }
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
         // Notifications toggle
         Row(
             modifier = Modifier.fillMaxWidth(),

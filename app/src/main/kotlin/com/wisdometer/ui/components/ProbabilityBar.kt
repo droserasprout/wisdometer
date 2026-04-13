@@ -14,8 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.wisdometer.ui.theme.WisdometerTypography
 import com.wisdometer.ui.theme.weightColor
@@ -28,17 +26,9 @@ fun ProbabilityBar(
     barColor: Color,
     isActualOutcome: Boolean,
     isTopPrediction: Boolean,
-    compact: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val barHeight: Dp = if (compact) 6.dp else 10.dp
-    val verticalPadding: Dp = if (compact) 2.dp else 4.dp
-    val gap: Dp = if (compact) 2.dp else 3.dp
-
-    val textStyle: TextStyle = if (compact) WisdometerTypography.labelSmall else WisdometerTypography.bodyLarge
-    val iconSize: Dp = if (compact) 12.dp else 16.dp
-
-    Column(modifier = modifier.padding(vertical = verticalPadding)) {
+    Column(modifier = modifier.padding(vertical = 4.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -52,7 +42,7 @@ fun ProbabilityBar(
                     Icon(
                         Icons.Outlined.CheckCircle,
                         contentDescription = "actual outcome",
-                        modifier = Modifier.size(iconSize),
+                        modifier = Modifier.size(16.dp),
                         tint = barColor,
                     )
                 }
@@ -60,26 +50,26 @@ fun ProbabilityBar(
                     Icon(
                         Icons.Outlined.Star,
                         contentDescription = "top prediction",
-                        modifier = Modifier.size(iconSize),
+                        modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 Text(
                     text = label,
-                    style = textStyle,
+                    style = WisdometerTypography.bodyLarge,
                     color = if (isActualOutcome) barColor else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Text(
                 text = "${weight}.0",
-                style = textStyle,
+                style = WisdometerTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Spacer(modifier = Modifier.height(2.dp))
         Row(
-            modifier = Modifier.fillMaxWidth().height(barHeight),
-            horizontalArrangement = Arrangement.spacedBy(gap),
+            modifier = Modifier.fillMaxWidth().height(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
         ) {
             for (i in 1..10) {
                 val segmentColor = if (i <= weight) weightColor(i) else weightColor(i).copy(alpha = 0.15f)

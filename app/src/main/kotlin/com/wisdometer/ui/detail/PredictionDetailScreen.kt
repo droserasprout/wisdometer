@@ -139,7 +139,6 @@ fun PredictionDetailScreen(
                         barColor = weightColor(option.weight),
                         isActualOutcome = option.id == pw.prediction.outcomeOptionId,
                         isTopPrediction = option.id == topOptionId,
-                        compact = false,
                     )
                 }
 
