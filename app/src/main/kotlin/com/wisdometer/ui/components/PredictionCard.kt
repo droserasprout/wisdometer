@@ -10,6 +10,7 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -72,7 +73,7 @@ fun PredictionCard(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            SectionDivider()
 
             item.sortedOptions.forEach { option ->
                 ProbabilityBar(
@@ -85,8 +86,9 @@ fun PredictionCard(
                 )
             }
 
+            SectionDivider()
+
             if (tags.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -103,12 +105,22 @@ fun PredictionCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                Spacer(modifier = Modifier.height(8.dp))
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
             TimelineFooter(item.prediction)
         }
     }
+}
+
+@Composable
+private fun SectionDivider() {
+    Spacer(modifier = Modifier.height(12.dp))
+    HorizontalDivider(
+        thickness = 1.dp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+    )
+    Spacer(modifier = Modifier.height(12.dp))
 }
 
 @Composable

@@ -20,11 +20,11 @@ fun StatusBadge(isResolved: Boolean, modifier: Modifier = Modifier) {
 
     Text(
         text = label,
-        style = WisdometerTypography.labelMedium,
+        style = WisdometerTypography.bodySmall,
         color = text,
         modifier = modifier
-            .clip(RoundedCornerShape(4.dp))
+            .clip(RoundedCornerShape(6.dp))
             .background(bg)
-            .padding(horizontal = 6.dp, vertical = 2.dp),
+            .padding(horizontal = 10.dp, vertical = 4.dp),
     )
 }
