@@ -61,38 +61,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         }
 
         Spacer(modifier = Modifier.height(20.dp))
-        SectionHeader("Accuracy")
-        Spacer(modifier = Modifier.height(8.dp))
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                SpeedometerGauge(
-                    fraction = state.simpleCloseness.toFloat(),
-                    valueText = if (state.isLoaded) "${(state.simpleCloseness * 100).roundToInt()}%" else "...",
-                    label = "Accuracy",
-                    modifier = Modifier.weight(1f),
-                )
-                SpeedometerGauge(
-                    fraction = (state.brierScore / 2.0).toFloat(),
-                    valueText = if (state.isLoaded) "%.2f".format(state.brierScore) else "...",
-                    label = "Brier",
-                    invert = true,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-        SectionHeader("Confidence")
+        SectionHeader("Stats")
         Spacer(modifier = Modifier.height(8.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -102,14 +71,32 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    ConfidenceStat(
-                        label = "All",
-                        value = if (state.isLoaded) "${(state.avgConfidence * 10).roundToInt()}%" else "...",
+                    SpeedometerGauge(
+                        fraction = state.simpleCloseness.toFloat(),
+                        valueText = if (state.isLoaded) "${(state.simpleCloseness * 100).roundToInt()}%" else "...",
+                        label = "Accuracy",
                         modifier = Modifier.weight(1f),
                     )
-                    ConfidenceStat(
-                        label = "Open only",
-                        value = if (state.isLoaded) "${(state.avgConfidenceOpen * 10).roundToInt()}%" else "...",
+                    SpeedometerGauge(
+                        fraction = (state.brierScore / 2.0).toFloat(),
+                        valueText = if (state.isLoaded) "%.2f".format(state.brierScore) else "...",
+                        label = "Brier",
+                        invert = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    SpeedometerGauge(
+                        fraction = (state.avgConfidence / 10.0).toFloat(),
+                        valueText = if (state.isLoaded) "${(state.avgConfidence * 10).roundToInt()}%" else "...",
+                        label = "Total",
+                        modifier = Modifier.weight(1f),
+                    )
+                    SpeedometerGauge(
+                        fraction = (state.avgConfidenceOpen / 10.0).toFloat(),
+                        valueText = if (state.isLoaded) "${(state.avgConfidenceOpen * 10).roundToInt()}%" else "...",
+                        label = "Current",
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -287,25 +274,3 @@ private fun CompactStatTile(
     }
 }
 
-@Composable
-private fun ConfidenceStat(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            value,
-            style = WisdometerTypography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
