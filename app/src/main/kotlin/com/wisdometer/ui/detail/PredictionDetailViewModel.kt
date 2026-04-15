@@ -39,6 +39,19 @@ class PredictionDetailViewModel @Inject constructor(
         }
     }
 
+    fun unresolve() {
+        val current = item.value ?: return
+        viewModelScope.launch {
+            repository.savePrediction(
+                current.prediction.copy(
+                    outcomeOptionId = null,
+                    resolvedAt = null,
+                ),
+                current.options,
+            )
+        }
+    }
+
     fun delete(onDone: () -> Unit) {
         val current = item.value ?: return
         viewModelScope.launch {

@@ -1,5 +1,6 @@
 package com.wisdometer.ui.detail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
@@ -38,6 +39,7 @@ fun PredictionDetailScreen(
 
     val item by viewModel.item.collectAsState()
     var showOutcomeDialog by remember { mutableStateOf(false) }
+    var showUnresolveDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -150,7 +152,15 @@ fun PredictionDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                if (!pw.isResolved) {
+                if (pw.isResolved) {
+                    OutlinedButton(
+                        onClick = { showUnresolveDialog = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                    ) {
+                        Text("Unresolve")
+                    }
+                } else {
                     Button(
                         onClick = { showOutcomeDialog = true },
                         modifier = Modifier.fillMaxWidth(),
@@ -158,13 +168,17 @@ fun PredictionDetailScreen(
                     ) {
                         Text("Set Outcome")
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
+                Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedButton(
                     onClick = { showDeleteDialog = true },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error,
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
                 ) {
                     Text("Delete Prediction")
                 }
@@ -192,6 +206,23 @@ fun PredictionDetailScreen(
                     confirmButton = {},
                     dismissButton = {
                         TextButton(onClick = { showOutcomeDialog = false }) { Text("Cancel") }
+                    },
+                )
+            }
+
+            if (showUnresolveDialog) {
+                AlertDialog(
+                    onDismissRequest = { showUnresolveDialog = false },
+                    title = { Text("Unresolve Prediction?") },
+                    text = { Text("This will clear the recorded outcome and reopen the prediction.") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.unresolve()
+                            showUnresolveDialog = false
+                        }) { Text("Unresolve") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showUnresolveDialog = false }) { Text("Cancel") }
                     },
                 )
             }
