@@ -80,7 +80,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                     SpeedometerGauge(
                         fraction = (state.brierScore / 2.0).toFloat(),
                         valueText = if (state.isLoaded) "%.2f".format(state.brierScore) else "...",
-                        label = "Brier",
+                        label = "Brier score",
                         invert = true,
                         modifier = Modifier.weight(1f),
                     )
@@ -90,13 +90,13 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                     SpeedometerGauge(
                         fraction = (state.avgConfidence / 10.0).toFloat(),
                         valueText = if (state.isLoaded) "${(state.avgConfidence * 10).roundToInt()}%" else "...",
-                        label = "Total",
+                        label = "Average confidence",
                         modifier = Modifier.weight(1f),
                     )
                     SpeedometerGauge(
                         fraction = (state.avgConfidenceOpen / 10.0).toFloat(),
                         valueText = if (state.isLoaded) "${(state.avgConfidenceOpen * 10).roundToInt()}%" else "...",
-                        label = "Current",
+                        label = "Current confidence",
                         modifier = Modifier.weight(1f),
                     )
                 }
