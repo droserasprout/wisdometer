@@ -14,3 +14,10 @@ object Dim {
     val BadgeShape = RoundedCornerShape(8.dp)
     val BarShape = RoundedCornerShape(2.dp)
 }
+
+object ChartDim {
+    val leftPad = 36.dp
+    val rightPad = 8.dp
+    val topPad = 16.dp
+    val bottomPad = 24.dp
+}

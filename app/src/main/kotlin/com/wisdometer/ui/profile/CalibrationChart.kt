@@ -13,8 +13,10 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.dp
 import com.wisdometer.domain.CalibrationPoint
 import com.wisdometer.ui.theme.BarColors
+import com.wisdometer.ui.theme.ChartDim
 import com.wisdometer.ui.theme.LocalWisdometerColors
 import com.wisdometer.ui.theme.WisdometerTypography
 
@@ -44,48 +46,49 @@ fun CalibrationChart(
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-        val left = 48f
-        val right = 16f
-        val top = 16f
-        val bottom = 32f
+        val left = ChartDim.leftPad.toPx()
+        val right = ChartDim.rightPad.toPx()
+        val top = ChartDim.topPad.toPx()
+        val bottom = ChartDim.bottomPad.toPx()
         val cw = w - left - right
         val ch = h - top - bottom
+        val gridStroke = 1.dp.toPx()
+        val diagonalStroke = 1.5.dp.toPx()
+        val dotStroke = 1.5.dp.toPx()
 
         fun xOf(pct: Float) = left + cw * pct / 100f
         fun yOf(rate: Float) = top + ch * (1f - rate / 100f)
 
-        // Grid lines + Y labels at 0/25/50/75/100%
         for (pct in listOf(0, 25, 50, 75, 100)) {
             val y = yOf(pct.toFloat())
-            drawLine(gridColor, Offset(left, y), Offset(left + cw, y), strokeWidth = 1f)
+            drawLine(gridColor, Offset(left, y), Offset(left + cw, y), strokeWidth = gridStroke)
             val m = textMeasurer.measure("$pct%", labelStyle)
-            drawText(m, topLeft = Offset(left - m.size.width - 6f, y - m.size.height / 2f))
+            drawText(m, topLeft = Offset(left - m.size.width - 4.dp.toPx(), y - m.size.height / 2f))
         }
 
-        // X labels at 0/50/100%
         for (pct in listOf(0, 50, 100)) {
             val x = xOf(pct.toFloat())
             val m = textMeasurer.measure("$pct%", labelStyle)
-            drawText(m, topLeft = Offset(x - m.size.width / 2f, top + ch + 6f))
+            drawText(m, topLeft = Offset(x - m.size.width / 2f, top + ch + 4.dp.toPx()))
         }
 
-        // Perfect calibration diagonal (dashed)
         drawLine(
             color = diagonalColor,
             start = Offset(xOf(0f), yOf(0f)),
             end = Offset(xOf(100f), yOf(100f)),
-            strokeWidth = 2f,
-            pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f)),
+            strokeWidth = diagonalStroke,
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx())),
         )
 
-        // Data points — radius scales with sample count
         val maxCount = points.maxOf { it.count }
+        val baseRadius = 4.dp.toPx()
+        val radiusRange = 6.dp.toPx()
         for (pt in points) {
             val x = xOf(pt.predictedPct.toFloat())
             val y = yOf((pt.actualRate * 100).toFloat())
-            val radius = 6f + 10f * (pt.count.toFloat() / maxCount)
+            val radius = baseRadius + radiusRange * (pt.count.toFloat() / maxCount)
             drawCircle(dotColor.copy(alpha = 0.25f), radius = radius, center = Offset(x, y))
-            drawCircle(dotColor, radius = radius, center = Offset(x, y), style = Stroke(width = 2f))
+            drawCircle(dotColor, radius = radius, center = Offset(x, y), style = Stroke(width = dotStroke))
         }
     }
 }

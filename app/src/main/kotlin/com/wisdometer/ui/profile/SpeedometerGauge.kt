@@ -14,11 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
+import com.wisdometer.ui.theme.SemanticColors
 import com.wisdometer.ui.theme.WisdometerTypography
 import kotlin.math.cos
 import kotlin.math.sin
@@ -39,9 +39,6 @@ fun SpeedometerGauge(
     modifier: Modifier = Modifier,
     invert: Boolean = false,
 ) {
-    val red = Color(0xFFD96A6A)
-    val amber = Color(0xFFE8A44A)
-    val green = Color(0xFF5CB85C)
     val needleColor = MaterialTheme.colorScheme.onSurface
     val valueColor = MaterialTheme.colorScheme.onSurface
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -71,8 +68,11 @@ fun SpeedometerGauge(
             for (i in 0 until segments) {
                 val t = i.toFloat() / (segments - 1)
                 val gradientT = if (invert) 1f - t else t
-                val col = if (gradientT < 0.5f) lerp(red, amber, gradientT * 2f)
-                else lerp(amber, green, (gradientT - 0.5f) * 2f)
+                val col = if (gradientT < 0.5f) {
+                    lerp(SemanticColors.red, SemanticColors.amber, gradientT * 2f)
+                } else {
+                    lerp(SemanticColors.amber, SemanticColors.green, (gradientT - 0.5f) * 2f)
+                }
                 drawArc(
                     color = col,
                     startAngle = 180f + i * segSweep,
@@ -87,14 +87,14 @@ fun SpeedometerGauge(
             val clamped = fraction.coerceIn(0f, 1f)
             val needleAngleDeg = 180f + clamped * 180f
             val needleRad = Math.toRadians(needleAngleDeg.toDouble())
-            val needleLen = radius - strokeWidth / 2f - 2f
+            val needleLen = radius - strokeWidth / 2f - 2.dp.toPx()
             val nx = cx + (needleLen * cos(needleRad)).toFloat()
             val ny = cy + (needleLen * sin(needleRad)).toFloat()
             drawLine(
                 color = needleColor,
                 start = Offset(cx, cy),
                 end = Offset(nx, ny),
-                strokeWidth = 3f,
+                strokeWidth = 2.dp.toPx(),
                 cap = StrokeCap.Round,
             )
             drawCircle(

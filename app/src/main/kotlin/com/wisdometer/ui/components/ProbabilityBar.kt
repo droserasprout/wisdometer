@@ -2,7 +2,6 @@ package com.wisdometer.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Star
@@ -15,20 +14,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.wisdometer.ui.theme.Dim
 import com.wisdometer.ui.theme.WisdometerTypography
 import com.wisdometer.ui.theme.weightColor
 
 @Composable
 fun ProbabilityBar(
     label: String,
-    probability: Int,
     weight: Int,
     barColor: Color,
     isActualOutcome: Boolean,
     isTopPrediction: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.padding(vertical = 4.dp)) {
+    Column(modifier = modifier.padding(vertical = Dim.xs)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -42,7 +41,7 @@ fun ProbabilityBar(
                     Icon(
                         Icons.Outlined.CheckCircle,
                         contentDescription = "actual outcome",
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(14.dp),
                         tint = barColor,
                     )
                 }
@@ -50,7 +49,7 @@ fun ProbabilityBar(
                     Icon(
                         Icons.Outlined.Star,
                         contentDescription = "top prediction",
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(14.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -61,7 +60,7 @@ fun ProbabilityBar(
                 )
             }
             Text(
-                text = "${weight}.0",
+                text = "$weight",
                 style = WisdometerTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -77,7 +76,7 @@ fun ProbabilityBar(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .clip(RoundedCornerShape(2.dp))
+                        .clip(Dim.BarShape)
                         .background(segmentColor),
                 )
             }

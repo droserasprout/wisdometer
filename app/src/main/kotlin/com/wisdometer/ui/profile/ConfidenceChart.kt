@@ -12,7 +12,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.dp
 import com.wisdometer.domain.ConfidenceBucket
+import com.wisdometer.ui.theme.ChartDim
 import com.wisdometer.ui.theme.LocalWisdometerColors
 import com.wisdometer.ui.theme.WisdometerTypography
 import com.wisdometer.ui.theme.weightColor
@@ -43,12 +45,15 @@ fun ConfidenceChart(
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-        val left = 36f
-        val right = 8f
-        val top = 16f
-        val bottom = 32f
+        val left = ChartDim.leftPad.toPx()
+        val right = ChartDim.rightPad.toPx()
+        val top = ChartDim.topPad.toPx()
+        val bottom = ChartDim.bottomPad.toPx()
         val cw = w - left - right
         val ch = h - top - bottom
+        val gridStroke = 1.dp.toPx()
+        val tickStroke = 2.dp.toPx()
+        val cornerPx = 2.dp.toPx()
 
         val maxTotal = distribution.maxOf { it.total }.coerceAtLeast(1)
         val barCount = distribution.size
@@ -58,9 +63,9 @@ fun ConfidenceChart(
 
         for ((fraction, label) in listOf(0f to "0", 0.5f to "${maxTotal / 2}", 1f to "$maxTotal")) {
             val y = top + ch * (1f - fraction)
-            drawLine(gridColor, Offset(left, y), Offset(left + cw, y), strokeWidth = 1f)
+            drawLine(gridColor, Offset(left, y), Offset(left + cw, y), strokeWidth = gridStroke)
             val m = textMeasurer.measure(label, labelStyle)
-            drawText(m, topLeft = Offset(left - m.size.width - 4f, y - m.size.height / 2f))
+            drawText(m, topLeft = Offset(left - m.size.width - 4.dp.toPx(), y - m.size.height / 2f))
         }
 
         distribution.forEachIndexed { i, bucket ->
@@ -73,7 +78,7 @@ fun ConfidenceChart(
                 color = color.copy(alpha = 0.4f),
                 topLeft = Offset(x, y),
                 size = Size(barW, barH),
-                cornerRadius = CornerRadius(4f, 4f),
+                cornerRadius = CornerRadius(cornerPx, cornerPx),
             )
 
             if (bucket.actual > 0) {
@@ -81,20 +86,20 @@ fun ConfidenceChart(
                 val tickY = top + ch - tickH
                 drawLine(
                     color = color,
-                    start = Offset(x - 2f, tickY),
-                    end = Offset(x + barW + 2f, tickY),
-                    strokeWidth = 2.5f,
+                    start = Offset(x - 1.dp.toPx(), tickY),
+                    end = Offset(x + barW + 1.dp.toPx(), tickY),
+                    strokeWidth = tickStroke,
                 )
             }
 
             val xLabel = "${bucket.weight}"
             val m = textMeasurer.measure(xLabel, labelStyle)
-            drawText(m, topLeft = Offset(x + barW / 2f - m.size.width / 2f, top + ch + 6f))
+            drawText(m, topLeft = Offset(x + barW / 2f - m.size.width / 2f, top + ch + 4.dp.toPx()))
 
             if (bucket.total > 0) {
                 val topText = if (bucket.actual > 0) "${bucket.actual}/${bucket.total}" else "${bucket.total}"
                 val cm = textMeasurer.measure(topText, labelStyle)
-                drawText(cm, topLeft = Offset(x + barW / 2f - cm.size.width / 2f, y - cm.size.height - 2f))
+                drawText(cm, topLeft = Offset(x + barW / 2f - cm.size.width / 2f, y - cm.size.height - 2.dp.toPx()))
             }
         }
     }

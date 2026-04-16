@@ -1,6 +1,5 @@
 package com.wisdometer.ui.detail
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import com.wisdometer.data.model.tagList
+import com.wisdometer.ui.components.DestructiveOutlinedButton
 import com.wisdometer.ui.components.ProbabilityBar
 import com.wisdometer.ui.components.StatusBadge
 import com.wisdometer.share.ShareImageRenderer
@@ -132,12 +132,10 @@ fun PredictionDetailScreen(
                 }
                 Spacer(modifier = Modifier.height(12.dp))
 
-                val pctMap = pw.normalizedPercentages
                 val topOptionId = pw.sortedOptions.maxByOrNull { it.weight }?.id
-                pw.sortedOptions.forEachIndexed { index, option ->
+                pw.sortedOptions.forEach { option ->
                     ProbabilityBar(
                         label = option.label,
-                        probability = pctMap[option.id] ?: 0,
                         weight = option.weight,
                         barColor = weightColor(option.weight),
                         isActualOutcome = option.id == pw.prediction.outcomeOptionId,
@@ -162,14 +160,9 @@ fun PredictionDetailScreen(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedButton(
+                DestructiveOutlinedButton(
                     onClick = { showDeleteDialog = true },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                    ),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
                 ) {
                     Text("Delete Prediction")
                 }
