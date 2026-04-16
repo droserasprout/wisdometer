@@ -7,6 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.CalendarMonth
@@ -15,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.ZoneId
@@ -39,7 +41,6 @@ fun PredictionDetailScreen(
 
     val item by viewModel.item.collectAsState()
     var showOutcomeDialog by remember { mutableStateOf(false) }
-    var showUnresolveDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -152,22 +153,12 @@ fun PredictionDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                if (pw.isResolved) {
-                    OutlinedButton(
-                        onClick = { showUnresolveDialog = true },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                    ) {
-                        Text("Unresolve")
-                    }
-                } else {
-                    Button(
-                        onClick = { showOutcomeDialog = true },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                    ) {
-                        Text("Set Outcome")
-                    }
+                Button(
+                    onClick = { showOutcomeDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                ) {
+                    Text("Set Outcome")
                 }
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -187,10 +178,11 @@ fun PredictionDetailScreen(
             if (showOutcomeDialog) {
                 AlertDialog(
                     onDismissRequest = { showOutcomeDialog = false },
-                    title = { Text("Select Outcome") },
+                    title = { Text("Set Outcome") },
                     text = {
                         Column {
                             pw.sortedOptions.forEach { option ->
+                                val isCurrent = option.id == pw.prediction.outcomeOptionId
                                 TextButton(
                                     onClick = {
                                         viewModel.setOutcome(option.id)
@@ -198,7 +190,32 @@ fun PredictionDetailScreen(
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                 ) {
-                                    Text(option.label)
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Check,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .size(18.dp)
+                                                .alpha(if (isCurrent) 1f else 0f),
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(option.label, modifier = Modifier.weight(1f))
+                                    }
+                                }
+                            }
+                            if (pw.isResolved) {
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                TextButton(
+                                    onClick = {
+                                        viewModel.unresolve()
+                                        showOutcomeDialog = false
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Text("Mark as unresolved")
                                 }
                             }
                         }
@@ -206,23 +223,6 @@ fun PredictionDetailScreen(
                     confirmButton = {},
                     dismissButton = {
                         TextButton(onClick = { showOutcomeDialog = false }) { Text("Cancel") }
-                    },
-                )
-            }
-
-            if (showUnresolveDialog) {
-                AlertDialog(
-                    onDismissRequest = { showUnresolveDialog = false },
-                    title = { Text("Unresolve Prediction?") },
-                    text = { Text("This will clear the recorded outcome and reopen the prediction.") },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            viewModel.unresolve()
-                            showUnresolveDialog = false
-                        }) { Text("Unresolve") }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showUnresolveDialog = false }) { Text("Cancel") }
                     },
                 )
             }
