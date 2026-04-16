@@ -1,15 +1,16 @@
 package com.wisdometer.ui.detail
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -55,6 +56,20 @@ fun PredictionDetailScreen(
                 Spacer(modifier = Modifier.weight(1f))
                 item?.let { pw ->
                     val ctx = androidx.compose.ui.platform.LocalContext.current
+                    IconButton(onClick = { showOutcomeDialog = true }) {
+                        if (pw.isResolved) {
+                            Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = "Change outcome",
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        } else {
+                            Icon(
+                                Icons.Outlined.CheckCircle,
+                                contentDescription = "Set outcome",
+                            )
+                        }
+                    }
                     IconButton(onClick = {
                         ShareImageRenderer.sharePredictionCard(
                             context = ctx,
@@ -150,15 +165,6 @@ fun PredictionDetailScreen(
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = { showOutcomeDialog = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                ) {
-                    Text("Set Outcome")
-                }
-                Spacer(modifier = Modifier.height(8.dp))
 
                 DestructiveOutlinedButton(
                     onClick = { showDeleteDialog = true },

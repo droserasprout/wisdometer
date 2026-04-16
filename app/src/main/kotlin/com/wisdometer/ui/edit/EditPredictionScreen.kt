@@ -1,7 +1,6 @@
 package com.wisdometer.ui.edit
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -12,10 +11,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wisdometer.ui.components.WeightInputBar
+import com.wisdometer.ui.theme.Dim
 import com.wisdometer.ui.theme.WisdometerTypography
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -42,9 +41,14 @@ fun EditPredictionScreen(
     val scrollState = rememberScrollState()
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
+    var showDiscardDialog by remember { mutableStateOf(false) }
 
-    val canSave = state.question.isNotBlank() &&
-        state.reminderAt != null && !state.isSaving
+    val questionError = state.showValidation && state.question.isBlank()
+    val endDateError = state.showValidation && state.reminderAt == null
+
+    fun attemptClose() {
+        if (state.isDirty) showDiscardDialog = true else onDone()
+    }
 
     Scaffold(
         topBar = {
@@ -53,7 +57,7 @@ fun EditPredictionScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton(onClick = onDone) {
+                IconButton(onClick = ::attemptClose) {
                     Icon(Icons.Default.Close, contentDescription = "Close")
                 }
                 Text(
@@ -62,7 +66,7 @@ fun EditPredictionScreen(
                 )
                 IconButton(
                     onClick = { viewModel.save(onDone) },
-                    enabled = canSave,
+                    enabled = !state.isSaving,
                 ) {
                     Icon(Icons.Default.Check, contentDescription = "Save")
                 }
@@ -72,7 +76,7 @@ fun EditPredictionScreen(
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = Dim.md)
                 .verticalScroll(scrollState),
         ) {
             OutlinedTextField(
@@ -81,28 +85,32 @@ fun EditPredictionScreen(
                 label = { Text("Title") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                shape = RoundedCornerShape(8.dp),
+                shape = Dim.ButtonShape,
+                isError = questionError,
+                supportingText = if (questionError) {
+                    { Text("Required") }
+                } else null,
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Dim.sm))
             OutlinedTextField(
                 value = state.description,
                 onValueChange = viewModel::setDescription,
                 label = { Text("Description (optional)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
-                shape = RoundedCornerShape(8.dp),
+                shape = Dim.ButtonShape,
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Dim.md))
 
             Text("Options", style = WisdometerTypography.titleMedium)
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Dim.sm))
 
             state.options.forEachIndexed { index, option ->
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(Dim.sm),
                     ) {
                         OutlinedTextField(
                             value = option.label,
@@ -110,7 +118,7 @@ fun EditPredictionScreen(
                             label = { Text("Label") },
                             modifier = Modifier.weight(1f),
                             singleLine = true,
-                            shape = RoundedCornerShape(8.dp),
+                            shape = Dim.ButtonShape,
                         )
                         if (state.options.size > 2) {
                             IconButton(onClick = { viewModel.removeOption(index) }) {
@@ -118,73 +126,62 @@ fun EditPredictionScreen(
                             }
                         }
                     }
-                    Row(
+                    WeightInputBar(
+                        weight = option.weight,
+                        onWeightChange = { viewModel.setOptionWeight(index, it) },
                         modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        WeightInputBar(
-                            weight = option.weight,
-                            onWeightChange = { viewModel.setOptionWeight(index, it) },
-                            modifier = Modifier.weight(1f),
-                        )
-                        Text(
-                            "${option.weight}",
-                            style = WisdometerTypography.bodySmall,
-                            modifier = Modifier.width(24.dp),
-                            textAlign = TextAlign.Center,
-                        )
-                    }
+                    )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(Dim.sm))
             }
 
             TextButton(onClick = viewModel::addOption) {
                 Text("+ Add option")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Dim.md))
             OutlinedTextField(
                 value = state.tagsInput,
                 onValueChange = viewModel::setTagsInput,
                 label = { Text("Tags (comma-separated)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                shape = RoundedCornerShape(8.dp),
+                shape = Dim.ButtonShape,
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Dim.md))
 
-            // Start date
             val startLabel = formatDate(state.createdAt.toEpochMilli())
             OutlinedButton(
                 onClick = { showStartDatePicker = true },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
+                shape = Dim.ButtonShape,
             ) {
                 Text("Start: $startLabel")
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Dim.sm))
 
-            // End date (required)
             val endLabel = state.reminderAt?.let { "End: ${formatDate(it.toEpochMilli())}" }
                 ?: "Set end date"
             OutlinedButton(
                 onClick = { showEndDatePicker = true },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = if (state.reminderAt == null)
-                    ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                else
-                    ButtonDefaults.outlinedButtonColors(),
+                shape = Dim.ButtonShape,
             ) {
                 Text(endLabel)
             }
+            if (endDateError) {
+                Text(
+                    "Required",
+                    style = WisdometerTypography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(start = Dim.md, top = Dim.xs),
+                )
+            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Dim.lg))
 
-            // Start date picker dialog
             if (showStartDatePicker) {
                 val pickerState = rememberDatePickerState(
                     initialSelectedDateMillis = state.createdAt.toEpochMilli()
@@ -207,7 +204,6 @@ fun EditPredictionScreen(
                 }
             }
 
-            // End date picker dialog
             if (showEndDatePicker) {
                 val pickerState = rememberDatePickerState(
                     initialSelectedDateMillis = state.reminderAt?.toEpochMilli()
@@ -230,5 +226,22 @@ fun EditPredictionScreen(
                 }
             }
         }
+    }
+
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            title = { Text("Discard changes?") },
+            text = { Text("Unsaved edits will be lost.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDiscardDialog = false
+                    onDone()
+                }) { Text("Discard") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) { Text("Keep editing") }
+            },
+        )
     }
 }

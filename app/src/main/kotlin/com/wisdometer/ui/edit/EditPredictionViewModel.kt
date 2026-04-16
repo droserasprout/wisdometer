@@ -26,6 +26,8 @@ data class EditUiState(
     val tagsInput: String = "",
     val isSaving: Boolean = false,
     val isLoaded: Boolean = false,
+    val showValidation: Boolean = false,
+    val isDirty: Boolean = false,
     // preserved from original — never overwritten on edit
     val createdAt: Instant = Instant.now(),
     val resolvedAt: Instant? = null,
@@ -57,6 +59,7 @@ class EditPredictionViewModel @Inject constructor(
                         reminderAt = item.prediction.reminderAt,
                         tagsInput = item.prediction.tags.replace(",", ", "),
                         isLoaded = true,
+                        isDirty = false,
                         createdAt = item.prediction.createdAt,
                         resolvedAt = item.prediction.resolvedAt,
                         outcomeOptionId = item.prediction.outcomeOptionId,
@@ -66,38 +69,44 @@ class EditPredictionViewModel @Inject constructor(
         }
     }
 
-    fun setQuestion(q: String) = _state.update { it.copy(question = q) }
-    fun setDescription(d: String) = _state.update { it.copy(description = d) }
-    fun setStartDate(instant: Instant) = _state.update { it.copy(createdAt = instant) }
-    fun setEndDate(instant: Instant?) = _state.update { it.copy(reminderAt = instant) }
-    fun setTagsInput(t: String) = _state.update { it.copy(tagsInput = t) }
+    fun setQuestion(q: String) = edit { it.copy(question = q) }
+    fun setDescription(d: String) = edit { it.copy(description = d) }
+    fun setStartDate(instant: Instant) = edit { it.copy(createdAt = instant) }
+    fun setEndDate(instant: Instant?) = edit { it.copy(reminderAt = instant) }
+    fun setTagsInput(t: String) = edit { it.copy(tagsInput = t) }
 
     fun setOptionLabel(index: Int, label: String) = updateOption(index) { it.copy(label = label) }
     fun setOptionWeight(index: Int, weight: Int) {
         updateOption(index) { it.copy(weight = weight.coerceIn(1, 10)) }
     }
 
-    fun addOption() = _state.update { s ->
-        val newOptions = s.options + OptionDraft(sortOrder = s.options.size)
-        s.copy(options = newOptions)
+    fun addOption() = edit { s ->
+        s.copy(options = s.options + OptionDraft(sortOrder = s.options.size))
     }
 
-    fun removeOption(index: Int) = _state.update { s ->
+    fun removeOption(index: Int) = edit { s ->
         val newOptions = s.options.toMutableList().also { it.removeAt(index) }
             .mapIndexed { i, opt -> opt.copy(sortOrder = i) }
         s.copy(options = newOptions)
     }
 
     private fun updateOption(index: Int, transform: (OptionDraft) -> OptionDraft) =
-        _state.update { s ->
+        edit { s ->
             val newOptions = s.options.toMutableList()
             newOptions[index] = transform(newOptions[index])
             s.copy(options = newOptions)
         }
 
+    private inline fun edit(transform: (EditUiState) -> EditUiState) {
+        _state.update { transform(it).copy(isDirty = true) }
+    }
+
     fun save(onDone: () -> Unit) {
         val s = _state.value
-        if (s.question.isBlank()) return
+        if (s.question.isBlank() || s.reminderAt == null || s.isSaving) {
+            _state.update { it.copy(showValidation = true) }
+            return
+        }
         _state.update { it.copy(isSaving = true) }
         viewModelScope.launch {
             val tags = s.tagsInput.split(",").map { it.trim() }.filter { it.isNotBlank() }.joinToString(",")
