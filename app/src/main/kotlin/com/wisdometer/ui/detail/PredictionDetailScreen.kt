@@ -26,6 +26,7 @@ import com.wisdometer.ui.components.DestructiveOutlinedButton
 import com.wisdometer.ui.components.ProbabilityBar
 import com.wisdometer.ui.components.StatusBadge
 import com.wisdometer.share.ShareImageRenderer
+import com.wisdometer.ui.theme.Dim
 import com.wisdometer.ui.theme.WisdometerTypography
 import com.wisdometer.ui.theme.weightColor
 
@@ -161,7 +162,17 @@ fun PredictionDetailScreen(
                 val tags = pw.prediction.tagList
                 if (tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text("Tags: ${tags.joinToString(", ")}", style = WisdometerTypography.bodySmall)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Dim.xs),
+                    ) {
+                        tags.forEach { tag ->
+                            SuggestionChip(
+                                onClick = {},
+                                label = { Text(tag, style = MaterialTheme.typography.labelSmall) },
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))

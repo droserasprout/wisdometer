@@ -1,7 +1,6 @@
 package com.wisdometer.ui.profile
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -13,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wisdometer.share.ShareImageRenderer
+import com.wisdometer.ui.theme.Dim
 import com.wisdometer.ui.theme.WisdometerTypography
 import java.time.Instant
 import java.time.ZoneId
@@ -30,77 +30,65 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(Dim.md),
     ) {
         Text("Profile", style = WisdometerTypography.headlineLarge)
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dim.md))
 
         SectionHeader("Events")
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            CompactStatTile(
-                label = "Total",
-                value = if (state.isLoaded) state.totalPredictions.toString() else "...",
-                modifier = Modifier.weight(1f),
-            )
-            CompactStatTile(
-                label = "Open",
-                value = if (state.isLoaded) state.openPredictions.toString() else "...",
-                modifier = Modifier.weight(1f),
-            )
-            CompactStatTile(
-                label = "Resolved",
-                value = if (state.isLoaded) state.resolvedPredictions.toString() else "...",
-                modifier = Modifier.weight(1f),
-            )
-            CompactStatTile(
-                label = "Won",
-                value = if (state.isLoaded) state.wonPredictions.toString() else "...",
-                modifier = Modifier.weight(1f),
-            )
+        Spacer(modifier = Modifier.height(Dim.sm))
+        val valOrDots: (Int) -> String = { if (state.isLoaded) it.toString() else "…" }
+        Row(horizontalArrangement = Arrangement.spacedBy(Dim.sm), modifier = Modifier.fillMaxWidth()) {
+            CompactStatTile(label = "Total", value = valOrDots(state.totalPredictions), modifier = Modifier.weight(1f))
+            CompactStatTile(label = "Open", value = valOrDots(state.openPredictions), modifier = Modifier.weight(1f))
+        }
+        Spacer(modifier = Modifier.height(Dim.sm))
+        Row(horizontalArrangement = Arrangement.spacedBy(Dim.sm), modifier = Modifier.fillMaxWidth()) {
+            CompactStatTile(label = "Resolved", value = valOrDots(state.resolvedPredictions), modifier = Modifier.weight(1f))
+            CompactStatTile(label = "Won", value = valOrDots(state.wonPredictions), modifier = Modifier.weight(1f))
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Dim.lg))
         SectionHeader("Stats")
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Dim.sm))
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp),
+            shape = Dim.CardShape,
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(modifier = Modifier.padding(Dim.md)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Dim.md)) {
                     SpeedometerGauge(
                         fraction = state.simpleCloseness.toFloat(),
-                        valueText = if (state.isLoaded) "${(state.simpleCloseness * 100).roundToInt()}%" else "...",
+                        valueText = if (state.isLoaded) "${(state.simpleCloseness * 100).roundToInt()}%" else "…",
                         label = "Accuracy",
                         modifier = Modifier.weight(1f),
                     )
                     SpeedometerGauge(
                         fraction = (state.brierScore / 2.0).toFloat(),
-                        valueText = if (state.isLoaded) "%.2f".format(state.brierScore) else "...",
+                        valueText = if (state.isLoaded) "%.2f".format(state.brierScore) else "…",
                         label = "Brier score",
                         invert = true,
                         modifier = Modifier.weight(1f),
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Spacer(modifier = Modifier.height(Dim.md))
+                Row(horizontalArrangement = Arrangement.spacedBy(Dim.md)) {
                     SpeedometerGauge(
                         fraction = (state.avgConfidence / 10.0).toFloat(),
-                        valueText = if (state.isLoaded) "${(state.avgConfidence * 10).roundToInt()}%" else "...",
-                        label = "Average confidence",
+                        valueText = if (state.isLoaded) "${(state.avgConfidence * 10).roundToInt()}%" else "…",
+                        label = "Confidence (all)",
                         modifier = Modifier.weight(1f),
                     )
                     SpeedometerGauge(
                         fraction = (state.avgConfidenceOpen / 10.0).toFloat(),
-                        valueText = if (state.isLoaded) "${(state.avgConfidenceOpen * 10).roundToInt()}%" else "...",
-                        label = "Current confidence",
+                        valueText = if (state.isLoaded) "${(state.avgConfidenceOpen * 10).roundToInt()}%" else "…",
+                        label = "Confidence (open)",
                         modifier = Modifier.weight(1f),
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Dim.md))
                 ConfidenceChart(
                     distribution = state.confidenceDistribution,
                     modifier = Modifier.fillMaxWidth().height(180.dp),
@@ -108,19 +96,19 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Dim.lg))
         SectionHeader("Other")
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Dim.sm))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp),
+            shape = Dim.CardShape,
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(Dim.md)) {
                 Text("Accuracy over time", style = WisdometerTypography.titleMedium)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Dim.sm)) {
                     FilterChip(
                         selected = useTimeAxis,
                         onClick = { useTimeAxis = true },
@@ -132,7 +120,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                         label = { Text("By count") },
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(Dim.sm))
                 val chartPoints = if (useTimeAxis) state.accuracyOverTime else state.accuracyOverCount
                 val xFirst = chartPoints.firstOrNull()?.first?.let { v ->
                     if (useTimeAxis) chartDateFormatter.format(Instant.ofEpochMilli(v as Long))
@@ -153,21 +141,21 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Dim.md))
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp),
+            shape = Dim.CardShape,
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(Dim.md)) {
                 Text("Calibration", style = WisdometerTypography.titleMedium)
                 Text(
                     "Predicted % vs actual hit rate · dashed = perfect",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(Dim.sm))
                 CalibrationChart(
                     points = state.calibration,
                     modifier = Modifier.fillMaxWidth().height(200.dp),
@@ -176,16 +164,16 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
         }
 
         if (state.tagAccuracies.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Dim.md))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(12.dp),
+                shape = Dim.CardShape,
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(Dim.md)) {
                     Text("By Tag", style = WisdometerTypography.titleMedium)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Dim.sm))
                     state.tagAccuracies.forEach { ta ->
                         Row(
                             modifier = Modifier
@@ -205,10 +193,10 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Dim.md))
         val ctx = androidx.compose.ui.platform.LocalContext.current
         OutlinedButton(
-            shape = RoundedCornerShape(8.dp),
+            shape = Dim.ButtonShape,
             onClick = {
                 ShareImageRenderer.shareProfileStats(
                     context = ctx,
@@ -225,11 +213,11 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                 contentDescription = null,
                 modifier = Modifier
                     .size(18.dp)
-                    .padding(end = 4.dp),
+                    .padding(end = Dim.xs),
             )
             Text("Share Stats")
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Dim.md))
     }
 }
 
@@ -251,13 +239,13 @@ private fun CompactStatTile(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(12.dp),
+        shape = Dim.CardShape,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 8.dp),
+                .padding(vertical = 12.dp, horizontal = Dim.sm),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -273,4 +261,3 @@ private fun CompactStatTile(
         }
     }
 }
-

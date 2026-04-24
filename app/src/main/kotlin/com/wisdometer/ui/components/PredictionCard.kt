@@ -113,12 +113,12 @@ fun PredictionCard(
 
 @Composable
 private fun SectionDivider() {
-    Spacer(modifier = Modifier.height(12.dp))
+    Spacer(modifier = Modifier.height(8.dp))
     HorizontalDivider(
         thickness = 1.dp,
         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
     )
-    Spacer(modifier = Modifier.height(12.dp))
+    Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Composable

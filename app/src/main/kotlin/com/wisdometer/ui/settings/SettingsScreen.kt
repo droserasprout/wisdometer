@@ -4,14 +4,13 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.wisdometer.ui.theme.Dim
 import com.wisdometer.ui.theme.WisdometerTypography
+import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -30,46 +29,42 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(Dim.md),
     ) {
-        Text("Settings", style = WisdometerTypography.headlineLarge)
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Notifications toggle
+        SectionHeader("Notifications")
+        Spacer(modifier = Modifier.height(Dim.sm))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Notifications", style = WisdometerTypography.bodyMedium)
+            Text("Enable notifications", style = WisdometerTypography.bodyMedium)
             Switch(checked = state.notificationsEnabled, onCheckedChange = viewModel::setNotificationsEnabled)
         }
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        Spacer(modifier = Modifier.height(Dim.lg))
+        SectionHeader("Data")
+        Spacer(modifier = Modifier.height(Dim.sm))
 
-        // Export JSON button
         val today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         OutlinedButton(
             onClick = { exportLauncher.launch("wisdometer-export-$today.json") },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
+            shape = Dim.ButtonShape,
         ) {
             Text("Export JSON")
         }
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Import JSON button
+        Spacer(modifier = Modifier.height(Dim.sm))
         OutlinedButton(
             onClick = { importLauncher.launch(arrayOf("application/json")) },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
+            shape = Dim.ButtonShape,
         ) {
             Text("Import JSON")
         }
 
-        // Status message (auto-dismiss after 3 seconds)
         state.statusMessage?.let { msg ->
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Dim.md))
             Text(msg, style = WisdometerTypography.bodySmall, color = MaterialTheme.colorScheme.primary)
             LaunchedEffect(msg) {
                 kotlinx.coroutines.delay(3000)
@@ -77,4 +72,13 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             }
         }
     }
+}
+
+@Composable
+private fun SectionHeader(title: String) {
+    Text(
+        title.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
